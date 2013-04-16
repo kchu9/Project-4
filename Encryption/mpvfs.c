@@ -61,7 +61,11 @@ static int mpv_getattr(const char *path, struct stat *stbuf)
 	int res;
 	char buf[BUFSIZE];
 	res = lstat(mpv_fullpath(buf, path, BUFSIZE), stbuf);
-	res = lstat(path, stbuf);
+
+	#ifdef PRINTF_DEBUG
+	    fprintf(stderr, "mpv_getattr: res = %d\n", res);
+	#endif
+
 	if (res == -1)
 		return -errno;
 
@@ -71,8 +75,14 @@ static int mpv_getattr(const char *path, struct stat *stbuf)
 static int mpv_access(const char *path, int mask)
 {
 	int res;
+	char buf[BUFSIZE];
 
-	res = access(path, mask);
+	res = lstat(mpv_fullpath(buf, path, BUFSIZE), mask);
+	
+	#ifdef PRINTF_DEBUG
+	    fprintf(stderr, "mpv_access: res = %d\n", res);
+	#endif
+
 	if (res == -1)
 		return -errno;
 
@@ -82,8 +92,14 @@ static int mpv_access(const char *path, int mask)
 static int mpv_readlink(const char *path, char *buf, size_t size)
 {
 	int res;
+	char pathbuf[BUFSIZE];
 
-	res = readlink(path, buf, size - 1);
+   	res = readlink(mpv_fullpath(pathbuf, path, BUFSIZE), buf, size - 1);
+	
+	#ifdef PRINTF_DEBUG
+	    fprintf(stderr, "mpv_readlink: res = %d\n", res);
+	#endif
+	
 	if (res == -1)
 		return -errno;
 
@@ -97,11 +113,15 @@ static int mpv_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 {
 	DIR *dp;
 	struct dirent *de;
+	char pathbuf[BUFSIZE];
 
 	(void) offset;
 	(void) fi;
 
-	dp = opendir(path);
+	  dp = opendir(mpv_fullpath(pathbuf, path, BUFSIZE));
+	#ifdef PRINTF_DEBUG
+	    fprintf(stderr, "mpv_readdir: dp = %p\n", dp);
+	#endif
 	if (dp == NULL)
 		return -errno;
 
@@ -121,9 +141,17 @@ static int mpv_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 static int mpv_mknod(const char *path, mode_t mode, dev_t rdev)
 {
 	int res;
+	char buf[BUFSIZE];
 
+   	 mpv_fullpath(buf, path, BUFSIZE);
 	/* On Linux this could just be 'mknod(path, mode, rdev)' but this
 	   is more portable */
+
+	#ifdef PRINTF_DEBUG
+		fprintf(stderr, "mpv_mknod: ");
+	#endif
+
+
 	if (S_ISREG(mode)) {
 		res = open(path, O_CREAT | O_EXCL | O_WRONLY, mode);
 		if (res >= 0)
@@ -135,14 +163,23 @@ static int mpv_mknod(const char *path, mode_t mode, dev_t rdev)
 	if (res == -1)
 		return -errno;
 
+	#ifdef PRINTF_DEBUG
+	    fprintf(stderr, "res = %d\n", res);
+	#endif
 	return 0;
 }
 
 static int mpv_mkdir(const char *path, mode_t mode)
 {
 	int res;
+ 	char buf[BUFSIZE];
 
-	res = mkdir(path, mode);
+    	res = mkdir(mpv_fullpath(buf, path, BUFSIZE), mode);
+
+	#ifdef PRINTF_DEBUG
+	    fprintf(stderr, "leet_mkdir: res = %d\n", res);
+	#endif
+
 	if (res == -1)
 		return -errno;
 
@@ -152,8 +189,12 @@ static int mpv_mkdir(const char *path, mode_t mode)
 static int mpv_unlink(const char *path)
 {
 	int res;
+	  char buf[BUFSIZE];
 
-	res = unlink(path);
+    	res = unlink(mpv_fullpath(buf, path, BUFSIZE));
+	#ifdef PRINTF_DEBUG
+	    fprintf(stderr, "leet_unlink: res = %d\n", res);
+	#endif
 	if (res == -1)
 		return -errno;
 
@@ -163,8 +204,12 @@ static int mpv_unlink(const char *path)
 static int mpv_rmdir(const char *path)
 {
 	int res;
+  	char buf[BUFSIZE];
 
-	res = rmdir(path);
+	res = rmdir(mpv_fullpath(buf, path, BUFSIZE));
+	#ifdef PRINTF_DEBUG
+	    fprintf(stderr, "leet_rmdir: res = %d\n", res);
+	#endif
 	if (res == -1)
 		return -errno;
 
@@ -175,7 +220,14 @@ static int mpv_symlink(const char *from, const char *to)
 {
 	int res;
 
-	res = symlink(from, to);
+	char full_from[BUFSIZE];
+	char full_to[BUFSIZE];
+
+	res = symlink(mpv_fullpath(full_from, from, BUFSIZE), 
+		    mpv_fullpath(full_to, to, BUFSIZE));
+	#ifdef PRINTF_DEBUG
+	    fprintf(stderr, "mpv_symlink: res = %d\n", res);
+	#endif
 	if (res == -1)
 		return -errno;
 
@@ -185,8 +237,14 @@ static int mpv_symlink(const char *from, const char *to)
 static int mpv_rename(const char *from, const char *to)
 {
 	int res;
+	 char full_from[BUFSIZE];
+	 char full_to[BUFSIZE];
 
-	res = rename(from, to);
+	 res = rename(mpv_fullpath(full_from, from, BUFSIZE), 
+		    mpv_fullpath(full_to, to, BUFSIZE));
+	#ifdef PRINTF_DEBUG
+	    fprintf(stderr, "mpv_rename: res = %d\n", res);
+	#endif
 	if (res == -1)
 		return -errno;
 
@@ -197,7 +255,14 @@ static int mpv_link(const char *from, const char *to)
 {
 	int res;
 
-	res = link(from, to);
+	char full_from[BUFSIZE];
+    	char full_to[BUFSIZE];
+
+	res = link(mpv_fullpath(full_from, from, BUFSIZE), 
+            mpv_fullpath(full_to, to, BUFSIZE));
+	#ifdef PRINTF_DEBUG
+	    fprintf(stderr, "leet_link: res = %d\n", res);
+	#endif
 	if (res == -1)
 		return -errno;
 
@@ -207,8 +272,12 @@ static int mpv_link(const char *from, const char *to)
 static int mpv_chmod(const char *path, mode_t mode)
 {
 	int res;
+	char buf[BUFSIZE];
 
-	res = chmod(path, mode);
+	   res = chmod(mpv_fullpath(buf, path, BUFSIZE), mode);
+	#ifdef PRINTF_DEBUG
+	    fprintf(stderr, "leet_chmod: res = %d\n", res);
+	#endif
 	if (res == -1)
 		return -errno;
 
@@ -218,8 +287,12 @@ static int mpv_chmod(const char *path, mode_t mode)
 static int mpv_chown(const char *path, uid_t uid, gid_t gid)
 {
 	int res;
+	char buf[BUFSIZE];
 
-	res = lchown(path, uid, gid);
+	res = lchown(mpv_fullpath(buf, path, BUFSIZE), uid, gid);
+	#ifdef PRINTF_DEBUG
+	    fprintf(stderr, "leet_chown: res = %d\n", res);
+	#endif
 	if (res == -1)
 		return -errno;
 
@@ -229,8 +302,12 @@ static int mpv_chown(const char *path, uid_t uid, gid_t gid)
 static int mpv_truncate(const char *path, off_t size)
 {
 	int res;
+	char buf[BUFSIZE];
 
-	res = truncate(path, size);
+	res = truncate(mpv_fullpath(buf, path, BUFSIZE), size);
+	#ifdef PRINTF_DEBUG
+	    fprintf(stderr, "leet_truncate: res = %d\n", res);
+	#endif
 	if (res == -1)
 		return -errno;
 
@@ -241,13 +318,16 @@ static int mpv_utimens(const char *path, const struct timespec ts[2])
 {
 	int res;
 	struct timeval tv[2];
-
+	char buf[BUFSIZE];
 	tv[0].tv_sec = ts[0].tv_sec;
 	tv[0].tv_usec = ts[0].tv_nsec / 1000;
 	tv[1].tv_sec = ts[1].tv_sec;
 	tv[1].tv_usec = ts[1].tv_nsec / 1000;
 
-	res = utimes(path, tv);
+       res = utimes(mpv_fullpath(buf, path, BUFSIZE), tv);
+	#ifdef PRINTF_DEBUG
+	    fprintf(stderr, "leet_utimens: res = %d\n", res);
+	#endif
 	if (res == -1)
 		return -errno;
 
@@ -257,8 +337,12 @@ static int mpv_utimens(const char *path, const struct timespec ts[2])
 static int mpv_open(const char *path, struct fuse_file_info *fi)
 {
 	int res;
+	char buf[BUFSIZE];
 
-	res = open(path, fi->flags);
+	 res = open(mpv_fullpath(buf, path, BUFSIZE), fi->flags);
+	#ifdef PRINTF_DEBUG
+	    fprintf(stderr, "leet_open: res = %d\n", res);
+	#endif
 	if (res == -1)
 		return -errno;
 
@@ -269,11 +353,14 @@ static int mpv_open(const char *path, struct fuse_file_info *fi)
 static int mpv_read(const char *path, char *buf, size_t size, off_t offset,
 		    struct fuse_file_info *fi)
 {
+/*TODO add encryption/decryption*/
 	int fd;
 	int res;
+	char buf[BUFSIZE];
 
 	(void) fi;
-	fd = open(path, O_RDONLY);
+/**may have issue,conflicts with bbfs*/
+	fd = open(mpv_fullpath(buf, path, BUFSIZE), O_RDONLY);
 	if (fd == -1)
 		return -errno;
 
@@ -283,16 +370,20 @@ static int mpv_read(const char *path, char *buf, size_t size, off_t offset,
 
 	close(fd);
 	return res;
+
 }
 
 static int mpv_write(const char *path, const char *buf, size_t size,
 		     off_t offset, struct fuse_file_info *fi)
 {
+/*TODO add encryption/decryption*/
 	int fd;
 	int res;
+	char buf[BUFSIZE];
 
 	(void) fi;
-	fd = open(path, O_WRONLY);
+/**may have issue,conflicts with bbfs*/
+	fd = open((mpv_fullpath(buf, path, BUFSIZE), O_WRONLY);
 	if (fd == -1)
 		return -errno;
 
@@ -307,8 +398,12 @@ static int mpv_write(const char *path, const char *buf, size_t size,
 static int mpv_statfs(const char *path, struct statvfs *stbuf)
 {
 	int res;
+	char buf[BUFSIZE];
 
-	res = statvfs(path, stbuf);
+	 res = statvfs(mpv_fullpath(buf, path, BUFSIZE), stbuf);
+	#ifdef PRINTF_DEBUG
+	    fprintf(stderr, "leet_statfs: res = %d\n", res);
+	#endif
 	if (res == -1)
 		return -errno;
 
@@ -316,12 +411,16 @@ static int mpv_statfs(const char *path, struct statvfs *stbuf)
 }
 
 static int mpv_create(const char* path, mode_t mode, struct fuse_file_info* fi) {
-
+	
     (void) fi;
-
+    char buf[BUFSIZE];
+   #ifdef PRINTF_DEBUG
+    fprintf(stderr, "leet_create: res = %d\n", res);
+   #endif
+   /** may have an issue*/
     int res;
-    res = creat(path, mode);
-    if(res == -1)
+    res = creat(mpv_fullpath(buf, path, BUFSIZE), mode);
+    if(res <0)
 	return -errno;
 
     close(res);
@@ -356,7 +455,9 @@ static int mpv_fsync(const char *path, int isdatasync,
 static int mpv_setxattr(const char *path, const char *name, const char *value,
 			size_t size, int flags)
 {
-	int res = lsetxattr(path, name, value, size, flags);
+	 char buf[BUFSIZE];
+   	 int res = lsetxattr(mpv_fullpath(buf, path, BUFSIZE), name, value, 
+            size, flags);
 	if (res == -1)
 		return -errno;
 	return 0;
@@ -365,7 +466,8 @@ static int mpv_setxattr(const char *path, const char *name, const char *value,
 static int mpv_getxattr(const char *path, const char *name, char *value,
 			size_t size)
 {
-	int res = lgetxattr(path, name, value, size);
+	 char buf[BUFSIZE];
+    int res = lgetxattr(mpv_fullpath(buf, path, BUFSIZE), name, value, size);
 	if (res == -1)
 		return -errno;
 	return res;
@@ -373,7 +475,8 @@ static int mpv_getxattr(const char *path, const char *name, char *value,
 
 static int mpv_listxattr(const char *path, char *list, size_t size)
 {
-	int res = llistxattr(path, list, size);
+	  char buf[BUFSIZE];
+    int res = llistxattr(mpv_fullpath(buf, path, BUFSIZE), list, size);
 	if (res == -1)
 		return -errno;
 	return res;
@@ -381,7 +484,8 @@ static int mpv_listxattr(const char *path, char *list, size_t size)
 
 static int mpv_removexattr(const char *path, const char *name)
 {
-	int res = lremovexattr(path, name);
+	char buf[BUFSIZE];
+  	  int res = lremovexattr(mpv_fullpath(buf, path, BUFSIZE), name);
 	if (res == -1)
 		return -errno;
 	return 0;
