@@ -77,7 +77,7 @@ static int mpv_access(const char *path, int mask)
 	int res;
 	char buf[BUFSIZE];
 
-	res = lstat(mpv_fullpath(buf, path, BUFSIZE), mask);
+	 res = access(_leet_fullpath(buf, path, BUFSIZE), mask);
 	
 	#ifdef PRINTF_DEBUG
 	    fprintf(stderr, "mpv_access: res = %d\n", res);
@@ -356,11 +356,11 @@ static int mpv_read(const char *path, char *buf, size_t size, off_t offset,
 /*TODO add encryption/decryption*/
 	int fd;
 	int res;
-	char buf[BUFSIZE];
+	char pathbuf[BUFSIZE];
 
 	(void) fi;
 /**may have issue,conflicts with bbfs*/
-	fd = open(mpv_fullpath(buf, path, BUFSIZE), O_RDONLY);
+	fd = open(mpv_fullpath(pathbuf, path, BUFSIZE), O_RDONLY);
 	if (fd == -1)
 		return -errno;
 
@@ -379,11 +379,11 @@ static int mpv_write(const char *path, const char *buf, size_t size,
 /*TODO add encryption/decryption*/
 	int fd;
 	int res;
-	char buf[BUFSIZE];
+	char pathbuf[BUFSIZE];
 
 	(void) fi;
 /**may have issue,conflicts with bbfs*/
-	fd = open((mpv_fullpath(buf, path, BUFSIZE), O_WRONLY);
+	fd = open(mpv_fullpath(pathbuf, path, BUFSIZE), O_WRONLY);
 	if (fd == -1)
 		return -errno;
 
