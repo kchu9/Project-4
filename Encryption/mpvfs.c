@@ -33,6 +33,7 @@
 
 #include <fuse.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -58,8 +59,8 @@ static char *mpv_fullpath(char *buf, const char *path, size_t bufsize){
 static int mpv_getattr(const char *path, struct stat *stbuf)
 {
 	int res;
-	char buff[BUFSIZE];
-	res = lstat(_mpv_fullpath(buf, path, BUFSIZE), stbuf);
+	char buf[BUFSIZE];
+	res = lstat(mpv_fullpath(buf, path, BUFSIZE), stbuf);
 	res = lstat(path, stbuf);
 	if (res == -1)
 		return -errno;
