@@ -50,7 +50,7 @@ typedef struct {
 } mpv_state;
 
 static char *mpv_fullpath(char *buf, const char *path, size_t bufsize){
-    leet_state *state = (leet_state *)(fuse_get_context()->private_data);
+    mpv_state *state = (mpv_state *)(fuse_get_context()->private_data);
     snprintf(buf, bufsize, "%s%s", state->rootdir, path);
     return buf;
 }
@@ -59,7 +59,7 @@ static int mpv_getattr(const char *path, struct stat *stbuf)
 {
 	int res;
 	char buff[BUFSIZE];
-	res = lstat(_leet_fullpath(buf, path, BUFSIZE), stbuf);
+	res = lstat(_mpv_fullpath(buf, path, BUFSIZE), stbuf);
 	res = lstat(path, stbuf);
 	if (res == -1)
 		return -errno;
