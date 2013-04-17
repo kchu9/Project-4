@@ -40,7 +40,10 @@ mpvfs: mpvfs.o aes-crypt.o
 
 xor: xormpvfs.o xor-crypt.o
 	$(CC) $(LFLAGS) $^ -o $@ $(LLIBSFUSE) 
-
+xor.o: xormpvfs.c
+	$(CC) $(CFLAGS) $(CFLAGSFUSE) $<
+xor-crypt.o: xor-crypt.c
+	$(CC) $(CFLAGS) $(CFLAGSFUSE) $<
 xattr-util: xattr-util.o
 	$(CC) $(LFLAGS) $^ -o $@
 
