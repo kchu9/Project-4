@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 //#include<conio.h>
+extern int xor_do_crypt(FILE* fp1, int action, char* key_str);
+
+
 extern int xor_do_crypt(FILE* fp1, int action, char* key_str){
 	if(action<0)//pass through aka don't touch
 	{

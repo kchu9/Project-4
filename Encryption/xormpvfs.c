@@ -52,12 +52,9 @@
 #include <sys/xattr.h>
 #endif
 
-#include <openssl/evp.h>
-#include <openssl/aes.h>
-
-#include "aes-crypt.h"
+//#include "xor-crypt.h"
 #include "xor-crypt.c"
-extern int xor_do_crypt(FILE* fp1, int action, char* key_str);
+
 typedef struct {
     char *rootdir;
     char key[32];
@@ -143,7 +140,7 @@ static int mpv_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 	DIR *dp;
 	struct dirent *de;
 	char pathbuf[BUFSIZE];
-	char tempPath[BUFSIZE*2];
+	//char tempPath[BUFSIZE*2];
 	(void) offset;
 	(void) fi;
 
