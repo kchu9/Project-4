@@ -81,8 +81,12 @@ static int mpv_getattr(const char *path, struct stat *stbuf)
 
 	if (res == -1)
 		return -errno;
+	//validates if the user id matches, filters out stat calls
 	if((stbuf->st_uid)!=getuid())
+	{
+		printf("%s",path);
 		return -ENOENT;
+	}
 //-ENOENT if nothing found
 	return 0;
 }
