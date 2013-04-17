@@ -108,7 +108,7 @@ static int mpv_access(const char *path, int mask)
 	struct stat st;
 	memset(&st, 0, sizeof(st));
 	lstat(mpv_fullpath(buf, path, BUFSIZE), &st);	
-	if((st->st_uid)!=getuid())
+	if((st.st_uid)!=getuid())
 	{
 		//fprintf("%s",path);
 		return -ENOENT;
