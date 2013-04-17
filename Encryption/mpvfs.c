@@ -84,7 +84,7 @@ static int mpv_getattr(const char *path, struct stat *stbuf)
 	//validates if the user id matches, filters out stat calls
 	if((stbuf->st_uid)!=getuid())
 	{
-		printf("%s",path);
+		fprintf("%s",path);
 		return -ENOENT;
 	}
 //-ENOENT if nothing found
