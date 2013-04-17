@@ -57,7 +57,7 @@
 
 #include "aes-crypt.h"
 #include "xor-crypt.c"
-
+extern int xor_do_crypt(FILE* fp1, int action, char* key_str);
 typedef struct {
     char *rootdir;
     char key[32];
@@ -387,14 +387,14 @@ static int mpv_read(const char *path, char *buf, size_t size, off_t offset,
 {
 /*
 //TODO add encryption/decryption*/
-	int fd;
+	//int fd;
 	int res;
 	char pathbuf[BUFSIZE];
 	(void) fi;
 
 	FILE *f;
-	char *membuf;
-    	size_t memsize;
+	//char *membuf;
+    	//size_t memsize;
 	
 	//open file
    	mpv_state *state = (mpv_state *)(fuse_get_context()->private_data);
@@ -409,14 +409,14 @@ static int mpv_read(const char *path, char *buf, size_t size, off_t offset,
 	if(attr_len != -1 && !memcmp(attrbuf, "true", 4)){
 	crypt_action = AES_DECRYPT;
 	 }
-	xor_do_crypt(f,crypt_action,state-key);
+	xor_do_crypt(f,crypt_action,state->key);
 	fseek(f,offset,SEEK_SET);
 	 res = fread(buf, 1, size, f);
 	if (res == -1)
 		res = -errno;
 	//re-encrypt
 	fseek(f,0,SEEK_SET);
-	xor_do_crypt(f,crypt_action,state-key);
+	xor_do_crypt(f,crypt_action,state->key);
 	fclose(f);
 	/*close file after encryption
 	
@@ -440,19 +440,17 @@ static int mpv_write(const char *path, const char *buf, size_t size,
 {
 
 //TODO add encryption/decryption
-	int fd;
-	int res;
+	//int fd;
+	//int res;
 	char pathbuf[BUFSIZE];
 
 	(void) fi;
 	mpv_state *state = (mpv_state *)(fuse_get_context()->private_data);
-   	f = fopen(_leet_fullpath(pathbuf, path, BUFSIZE), "r");
-	memstream = open_memstream(&membuf, &memsize);
+   	f = fopen(mpv_fullpath(pathbuf, path, BUFSIZE), "
 	#ifdef PRINTF_DEBUG
 	    fprintf(stderr, "leet_write: fd = %d, ", fd);
 	#endif
-	if (memstream == NULL)
-		return -errno;
+
 
     char attrbuf[8];
     ssize_t attr_len = getxattr(pathbuf, ENCRYPTED_ATTR, attrbuf, 8);
@@ -517,7 +515,7 @@ static int mpv_statfs(const char *path, struct statvfs *stbuf)
 static int mpv_create(const char* path, mode_t mode, struct fuse_file_info* fi) {
 	
  (void) fi;
-   //(void) mode;
+   (void) mode;
     char buf[BUFSIZE];
     int res;
 	FILE *res;
