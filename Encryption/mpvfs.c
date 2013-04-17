@@ -157,7 +157,7 @@ static int mpv_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 		struct stat st;
 		memset(&st, 0, sizeof(st));
 		snprintf(tempPath,BUFSIZE,"%s%s",path,de->d_name);
-		lstat(mpv_fullpath(buf, path, BUFSIZE), &st);
+		lstat(mpv_fullpath(buf, tempPath, BUFSIZE), &st);
 		st.st_ino = de->d_ino;
 		st.st_mode = de->d_type << 12;
 		if (filler(buf, de->d_name, &st, 0))
