@@ -39,7 +39,7 @@ mpvfs: mpvfs.o aes-crypt.o
 	$(CC) $(LFLAGS) $^ -o $@ $(LLIBSFUSE) $(LLIBSOPENSSL)
 
 xor: xormpvfs.o xor-crypt.o
-	$(CC) $(LFLAGS) $^ -o $@ $(LLIBSFUSE) 
+	$(CC) $(LFLAGS) $(CFLAGS) $(CFLAGSFUSE) $^ -o $@ $(LLIBSFUSE) 
 xor.o: xormpvfs.c
 	$(CC) $(CFLAGS) $(CFLAGSFUSE) $<
 xor-crypt.o: xor-crypt.c
