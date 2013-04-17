@@ -82,11 +82,11 @@ static int mpv_getattr(const char *path, struct stat *stbuf)
 	if (res == -1)
 		return -errno;
 	//validates if the user id matches, filters out stat calls
-	/*if((stbuf->st_uid)!=getuid())
+	if((stbuf->st_uid)!=getuid())
 	{
 		fprintf("%s",path);
 		return -ENOENT;
-	}*/
+	}
 //-ENOENT if nothing found
 	return 0;
 }
@@ -105,7 +105,7 @@ static int mpv_access(const char *path, int mask)
 	if (res == -1)
 		return -errno;
 //validates if the user id matches, filters out stat calls
-	struct stat st;
+	/*struct stat st;
 	memset(&st, 0, sizeof(st));
 	lstat(mpv_fullpath(buf, path, BUFSIZE), &st);	
 	if((st.st_uid)!=getuid())
@@ -113,7 +113,7 @@ static int mpv_access(const char *path, int mask)
 		//fprintf("%s",path);
 		return -ENOENT;
 	}
-	free(&st);
+	free(&st);*/
 	return 0;
 }
 
@@ -142,7 +142,7 @@ static int mpv_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 	DIR *dp;
 	struct dirent *de;
 	char pathbuf[BUFSIZE];
-
+	char *tempPath;
 	(void) offset;
 	(void) fi;
 
@@ -156,6 +156,8 @@ static int mpv_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 	while ((de = readdir(dp)) != NULL) {
 		struct stat st;
 		memset(&st, 0, sizeof(st));
+		snprintf(tempPath,BUFSIZE,"%s%s",path,de_.d_name);
+		lstat(mpv_fullpath(buf, path, BUFSIZE), s);
 		st.st_ino = de->d_ino;
 		st.st_mode = de->d_type << 12;
 		if (filler(buf, de->d_name, &st, 0))
