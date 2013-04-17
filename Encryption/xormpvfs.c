@@ -444,8 +444,8 @@ static int mpv_write(const char *path, const char *buf, size_t size,
 	(void) fi;
 	
    	FILE *f = fopen(mpv_fullpath(pathbuf, path, BUFSIZE), "r+");
-	/*mpv_state *state = (mpv_state *)(fuse_get_context()->private_data);
-	#ifdef PRINTF_DEBUG
+	mpv_state *state = (mpv_state *)(fuse_get_context()->private_data);
+	/*#ifdef PRINTF_DEBUG
 	    fprintf(stderr, "leet_write: fd = %d, ", fd);
 	#endif
 
