@@ -19,8 +19,14 @@
 */
 
 #define FUSE_USE_VERSION 28
-#define HAVE_SETXATTR
 #define BUFSIZE 256
+#define PAGESIZE 4096
+#define CIPHER_BLOCKSIZE 128
+#define AES_ENCRYPT 1
+#define AES_DECRYPT 0
+#define AES_PASSTHRU -1
+#define HAVE_SETXATTR
+#define ENCRYPTED_ATTR  "user.pa5-encfs.encrypted"
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -31,9 +37,11 @@
 #define _XOPEN_SOURCE 500
 #endif
 
+#define _GNU_SOURCE
 #include <fuse.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -43,6 +51,11 @@
 #ifdef HAVE_SETXATTR
 #include <sys/xattr.h>
 #endif
+
+#include <openssl/evp.h>
+#include <openssl/aes.h>
+
+#include "aes-crypt.h"
 
 typedef struct {
     char *rootdir;
