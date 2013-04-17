@@ -38,7 +38,7 @@ fusexmp: fusexmp.o
 mpvfs: mpvfs.o aes-crypt.o
 	$(CC) $(LFLAGS) $^ -o $@ $(LLIBSFUSE) $(LLIBSOPENSSL)
 
-xor: xormpvfs.o
+xor: xormpvfs.o xor-crypt.o
 	$(CC) $(LFLAGS) $^ -o $@ $(LLIBSFUSE) 
 
 xattr-util: xattr-util.o
