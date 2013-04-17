@@ -84,7 +84,7 @@ static int mpv_getattr(const char *path, struct stat *stbuf)
 	//validates if the user id matches, filters out stat calls
 	if((stbuf->st_uid)!=getuid())
 	{
-		fprintf("%s",&path);
+		//fprintf("%s",&path);
 		return -ENOENT;
 	}
 //-ENOENT if nothing found
@@ -157,7 +157,7 @@ static int mpv_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 		struct stat st;
 		memset(&st, 0, sizeof(st));
 		snprintf(tempPath,BUFSIZE,"%s%s",path,de->d_name);
-		lstat(mpv_fullpath(buf, path, BUFSIZE), st);
+		lstat(mpv_fullpath(buf, path, BUFSIZE), &st);
 		st.st_ino = de->d_ino;
 		st.st_mode = de->d_type << 12;
 		if (filler(buf, de->d_name, &st, 0))
