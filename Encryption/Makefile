@@ -35,7 +35,7 @@ fusehello: fusehello.o
 fusexmp: fusexmp.o
 	$(CC) $(LFLAGS) $^ -o $@ $(LLIBSFUSE)
 
-pa5-encfs: leetfs.o aes-crypt.o
+pa5-encfs: mpvfs.o aes-crypt.o
 	$(CC) $(LFLAGS) $^ -o $@ $(LLIBSFUSE) $(LLIBSOPENSSL)
 
 xattr-util: xattr-util.o
@@ -50,7 +50,7 @@ fusehello.o: fusehello.c
 fusexmp.o: fusexmp.c
 	$(CC) $(CFLAGS) $(CFLAGSFUSE) $<
 
-leetfs.o: leetfs.c
+mpvfs.o: mpvfs.c
 	$(CC) $(CFLAGS) $(CFLAGSFUSE) $<
 
 xattr-util.o: xattr-util.c
