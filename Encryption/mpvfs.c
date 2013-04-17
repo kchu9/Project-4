@@ -81,7 +81,9 @@ static int mpv_getattr(const char *path, struct stat *stbuf)
 
 	if (res == -1)
 		return -errno;
-
+	if(stbuf->st_uid!=getuid)
+		return -ENOENT;
+//-ENOENT if nothing found
 	return 0;
 }
 
