@@ -370,7 +370,7 @@ static int mpv_read(const char *path, char *buf, size_t size, off_t offset,
 //TODO add encryption/decryption*/
 	int fd;
 	int res;
-	char pathbuf[BUFSIZE]
+	char pathbuf[BUFSIZE];
 	(void) fi;
 	fd = open(mpv_fullpath(pathbuf, path, BUFSIZE, O_RDONLY);
 	if (fd == -1)
@@ -409,27 +409,6 @@ static int mpv_write(const char *path, const char *buf, size_t size,
 	return res;
     }
 
-    fseek(memstream, offset, SEEK_SET);
-#if 0
-    res = pwrite(fileno(memstream), buf, size, offset);
-#endif
-    res = fwrite(buf, 1, size, memstream);
-    fflush(memstream);
-    f = fopen(pathbuf, "w");
-
-    /* Always encrypt the file data */
-    fseek(memstream, 0, SEEK_SET);
-    do_crypt(memstream, f, (encrypted ? AES_ENCRYPT : AES_PASSTHRU), state->key);
-    fclose(memstream);
-#ifdef PRINTF_DEBUG
-    fprintf(stderr, "res = %d\n", res);
-#endif
-    if (res == -1)
-        res = -errno;
-
-    fclose(f);
-    return res;
-}
 
 static int mpv_statfs(const char *path, struct statvfs *stbuf)
 {
