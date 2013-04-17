@@ -372,7 +372,7 @@ static int mpv_read(const char *path, char *buf, size_t size, off_t offset,
 	int res;
 	char pathbuf[BUFSIZE];
 	(void) fi;
-	fd = open(mpv_fullpath(pathbuf, path, BUFSIZE, O_RDONLY);
+	fd = open(mpv_fullpath(pathbuf, path, BUFSIZE), O_RDONLY);
 	if (fd == -1)
 		return -errno;
 
