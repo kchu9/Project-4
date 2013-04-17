@@ -353,13 +353,14 @@ static int mpv_open(const char *path, struct fuse_file_info *fi)
 static int mpv_read(const char *path, char *buf, size_t size, off_t offset,
 		    struct fuse_file_info *fi)
 {
-/*TODO add encryption/decryption*/
+/*
+//TODO add encryption/decryption
 	int fd;
 	int res;
 	char pathbuf[BUFSIZE];
 
 	(void) fi;
-/**may have issue,conflicts with bbfs*/
+//*may have issue,conflicts with bbfs
 	fd = open(mpv_fullpath(pathbuf, path, BUFSIZE), O_RDONLY);
 	if (fd == -1)
 		return -errno;
@@ -369,20 +370,65 @@ static int mpv_read(const char *path, char *buf, size_t size, off_t offset,
 		res = -errno;
 
 	close(fd);
-	return res;
+	return res;*/
+FILE *f, *memstream;
+    int res;
+    char pathbuf[BUFSIZE];
+    char *membuf;
+    size_t memsize;
+
+    (void) fi;
+    f = fopen(mpv_fullpath(pathbuf, path, BUFSIZE), "r");
+    memstream = open_memstream(&membuf, &memsize);
+#ifdef PRINTF_DEBUG
+    fprintf(stderr, "mpv_read: fd = %d, ", fd);
+#endif
+    if (f == NULL || memstream == NULL)
+        return -errno;
+
+    char attrbuf[8];
+    ssize_t attr_len = getxattr(pathbuf, ENCRYPTED_ATTR, attrbuf, 8);
+    int crypt_action = AES_PASSTHRU;
+    if(attr_len != -1 && !memcmp(attrbuf, "true", 4)){
+        crypt_action = AES_DECRYPT;
+    }
+
+    /* Assume file is encrypted. Decrypt */
+    mpv_state *state = (mpv_state *)(fuse_get_context()->private_data);
+    do_crypt(f, memstream, crypt_action, state->key);
+    fflush(memstream);
+#if 0
+    res = pread(fileno(tmp), buf, size, offset);
+#endif
+    fseek(memstream, offset, SEEK_SET);
+#if 0
+    res = pread(fileno(memstream), buf, size, offset);
+#endif
+    res = fread(buf, 1, size, memstream);
+    fclose(memstream);
+
+#ifdef PRINTF_DEBUG
+    fprintf(stderr, "res = %d\n", res);
+#endif
+    if (res == -1)
+        res = -errno;
+
+    fclose(f);
+    return res;
 
 }
 
 static int mpv_write(const char *path, const char *buf, size_t size,
 		     off_t offset, struct fuse_file_info *fi)
 {
-/*TODO add encryption/decryption*/
+/*
+//TODO add encryption/decryption
 	int fd;
 	int res;
 	char pathbuf[BUFSIZE];
 
 	(void) fi;
-/**may have issue,conflicts with bbfs*/
+//may have issue,conflicts with bbfs
 	fd = open(mpv_fullpath(pathbuf, path, BUFSIZE), O_WRONLY);
 	if (fd == -1)
 		return -errno;
@@ -392,7 +438,56 @@ static int mpv_write(const char *path, const char *buf, size_t size,
 		res = -errno;
 
 	close(fd);
-	return res;
+	return res;*/
+ FILE *f, *memstream;
+    int res;
+    char pathbuf[BUFSIZE];
+    char *membuf;
+    size_t memsize;
+
+    (void) fi;
+    mpv_state *state = (mpv_state *)(fuse_get_context()->private_data);
+    f = fopen(mpv_fullpath(pathbuf, path, BUFSIZE), "r");
+    memstream = open_memstream(&membuf, &memsize);
+#ifdef PRINTF_DEBUG
+    fprintf(stderr, "mpv_write: fd = %d, ", fd);
+#endif
+    if (memstream == NULL)
+        return -errno;
+
+    char attrbuf[8];
+    ssize_t attr_len = getxattr(pathbuf, ENCRYPTED_ATTR, attrbuf, 8);
+    int encrypted = 0;
+    if(attr_len != -1 && !memcmp(attrbuf, "true", 4)){
+        encrypted = 1;
+    }
+
+    if(f != NULL){
+        /* Decrypt into the temporary file */
+        do_crypt(f, memstream, (encrypted ? AES_DECRYPT : AES_PASSTHRU), state->key);
+        fclose(f);
+    }
+
+    fseek(memstream, offset, SEEK_SET);
+#if 0
+    res = pwrite(fileno(memstream), buf, size, offset);
+#endif
+    res = fwrite(buf, 1, size, memstream);
+    fflush(memstream);
+    f = fopen(pathbuf, "w");
+
+    /* Always encrypt the file data */
+    fseek(memstream, 0, SEEK_SET);
+    do_crypt(memstream, f, (encrypted ? AES_ENCRYPT : AES_PASSTHRU), state->key);
+    fclose(memstream);
+#ifdef PRINTF_DEBUG
+    fprintf(stderr, "res = %d\n", res);
+#endif
+    if (res == -1)
+        res = -errno;
+
+    fclose(f);
+    return res;
 }
 
 static int mpv_statfs(const char *path, struct statvfs *stbuf)
@@ -412,18 +507,43 @@ static int mpv_statfs(const char *path, struct statvfs *stbuf)
 
 static int mpv_create(const char* path, mode_t mode, struct fuse_file_info* fi) {
 	
-    (void) fi;
+    /*(void) fi;
     char buf[BUFSIZE];
    #ifdef PRINTF_DEBUG
     fprintf(stderr, "mpv_create: res = %d\n", res);
    #endif
-   /** may have an issue*/
+   // may have an issue
     int res;
     res = creat(mpv_fullpath(buf, path, BUFSIZE), mode);
     if(res <0)
 	return -errno;
 
     close(res);
+
+    return 0;*/
+ (void) fi;
+    (void) mode;
+    char buf[BUFSIZE];
+
+    FILE *res;
+    res = fopen(mpv_fullpath(buf, path, BUFSIZE), "w");
+#ifdef PRINTF_DEBUG
+    fprintf(stderr, "mpv_create: res = %d\n", res);
+#endif
+    if(res == NULL)
+        return -errno;
+
+    FILE *tmp = tmpfile();
+    mpv_state *state = (mpv_state *)(fuse_get_context()->private_data);
+    do_crypt(tmp, res, AES_ENCRYPT, state->key);
+    fclose(tmp);
+
+    if(fsetxattr(fileno(res), ENCRYPTED_ATTR, "true", 4, 0)){
+        return -errno;
+    }
+
+    fclose(res);
+
 
     return 0;
 }
