@@ -105,12 +105,15 @@ static int mpv_access(const char *path, int mask)
 	if (res == -1)
 		return -errno;
 //validates if the user id matches, filters out stat calls
+	struct stat st;
+	memset(&st, 0, sizeof(st));
+	lstat(mpv_fullpath(buf, path, BUFSIZE), st);	
 	if((stbuf->st_uid)!=getuid())
 	{
-		fprintf("%s",path);
+		//fprintf("%s",path);
 		return -ENOENT;
 	}
-
+	free(st);
 	return 0;
 }
 
