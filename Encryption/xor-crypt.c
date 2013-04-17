@@ -3,7 +3,10 @@
 #include <string.h>
 //#include<conio.h>
 extern int xor_do_crypt(FILE* fp1, int action, char* key_str){
-	
+	if(action<0)//pass through aka don't touch
+	{
+	return 0;
+	}
 	int val1;
 	int write_at=0;
 	int read_at=0;
@@ -30,14 +33,14 @@ extern int xor_do_crypt(FILE* fp1, int action, char* key_str){
 	count++;
 	}
 	printf("Success!");
-	fclose(fp1);
+	//fclose(fp1);
 
 return 0;
 }
 
 
 
-int main(int argc, char *argv[])
+/*int main(int argc, char *argv[])
 {
 FILE *fp1;
 if(argc!=3)
@@ -95,5 +98,5 @@ strncpy(pass,"pass",4);*/
 	fclose(fp1);
 
 return 0;*/
-}
+//}
 
