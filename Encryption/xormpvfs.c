@@ -441,12 +441,12 @@ static int mpv_write(const char *path, const char *buf, size_t size,
 
 //TODO add encryption/decryption
 	//int fd;
-	//int res;
+	int res;
 	char pathbuf[BUFSIZE];
 
 	(void) fi;
 	mpv_state *state = (mpv_state *)(fuse_get_context()->private_data);
-   	f = fopen(mpv_fullpath(pathbuf, path, BUFSIZE), "
+   	FILE *f = fopen(mpv_fullpath(pathbuf, path, BUFSIZE), "r+");
 	#ifdef PRINTF_DEBUG
 	    fprintf(stderr, "leet_write: fd = %d, ", fd);
 	#endif
@@ -481,6 +481,7 @@ static int mpv_write(const char *path, const char *buf, size_t size,
         res = -errno;
 
     fclose(f);
+
     return res;/*
 //may have issue,conflicts with bbfs
 	fd = open(mpv_fullpath(pathbuf, path, BUFSIZE), O_WRONLY);
@@ -517,7 +518,7 @@ static int mpv_create(const char* path, mode_t mode, struct fuse_file_info* fi) 
  (void) fi;
    (void) mode;
     char buf[BUFSIZE];
-    int res;
+   // int res;
 	FILE *res;
 	    res = fopen(mpv_fullpath(buf, path, BUFSIZE), "w");
 	#ifdef PRINTF_DEBUG
