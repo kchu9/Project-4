@@ -142,7 +142,7 @@ static int mpv_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 	DIR *dp;
 	struct dirent *de;
 	char pathbuf[BUFSIZE];
-	char *tempPath;
+	char tempPath[BUFSIZE*2];
 	(void) offset;
 	(void) fi;
 
@@ -156,8 +156,9 @@ static int mpv_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 	while ((de = readdir(dp)) != NULL) {
 		struct stat st;
 		memset(&st, 0, sizeof(st));
-		//snprintf(tempPath,BUFSIZE*2,"%s%s",path,de->d_name);
-		//lstat(mpv_fullpath(buf, tempPath, 2*BUFSIZE), &st);
+		//try strncat();
+		snprintf(tempPath,BUFSIZE*2,"%s%s",path,de->d_name); 
+		lstat(mpv_fullpath(buf, tempPath, 2*BUFSIZE), &st);
 		st.st_ino = de->d_ino;
 		st.st_mode = de->d_type << 12;
 		if (filler(buf, de->d_name, &st, 0))
