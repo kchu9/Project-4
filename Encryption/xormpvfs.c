@@ -582,14 +582,14 @@ static int mpv_create(const char* path, mode_t mode, struct fuse_file_info* fi) 
 	    if(mpv_setxattr(buf, ENCRYPTED_ATTR, "true", strlen("true"), 0)){
 		return -errno;
 	    }
-	if(setxattr(buf, IS_ENCRYPTED, "false", strlen("false"), 0)){
+	if(lsetxattr(buf, IS_ENCRYPTED, "false", strlen("false"), 0)){
 		return -2;
 	    }
 	fprintf(stderr, "Insert \n" );
 	char *tmpval;
-	int valsize= getxattr(buf, IS_ENCRYPTED, NULL, 0);
+	int valsize= lgetxattr(buf, IS_ENCRYPTED, NULL, 0);
 	tmpval = malloc(sizeof(*tmpval)*(valsize+1));
-	valsize=getxattr(buf, IS_ENCRYPTED, tmpval, valsize);
+	valsize=lgetxattr(buf, IS_ENCRYPTED, tmpval, valsize);
 	tmpval[valsize] = '\0';
           
 	 fprintf(stderr, "\nIS_ENCRYPTED=%s \n",tmpval );
