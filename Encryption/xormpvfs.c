@@ -26,7 +26,8 @@
 #define AES_DECRYPT 0
 #define AES_PASSTHRU -1
 #define HAVE_SETXATTR
-#define ENCRYPTED_ATTR  "user.pa5-encfs.encrypted"
+#define ENCRYPTED_ATTR  "user.encrypted"
+#define IS_ENCRYPTED "file currently encrypted"
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -403,12 +404,13 @@ fprintf(stderr, "I'm Reading!\n");
 	//check xattr, run xor encryption (decrypt if necessary)
 	char attrbuf[8];
 	ssize_t attr_len = getxattr(pathbuf, ENCRYPTED_ATTR, attrbuf, 8);
-	int crypt_action = AES_PASSTHRU;
-	if(attr_len != -1 && !memcmp(attrbuf, "true", 4)){
-	crypt_action = AES_DECRYPT;
+	int crypt_action = AES_PASSTHRU; //TODO default decrypt->eventually
+	/* if(attr_len != -1 && strncmp("true",attrbuf,){
+        encrypted = 1;//TODO passthrough->eventually
 	fprintf(stderr, "Decrypt!\n");
-	 }
-	xor_do_crypt(f,crypt_action,state->key);
+	 }*/
+	//xor_do_crypt(f,crypt_action,state->key);
+	//xor_do_crypt(f,crypt_action,state->key);
 	fseek(f,offset,SEEK_SET);
 	 res = fread(buf, 1, size, f);
 	if (res == -1)
@@ -443,7 +445,7 @@ static int mpv_write(const char *path, const char *buf, size_t size,
 	   fprintf(stderr, "I'm writing!\n");
 	int res;
 	char pathbuf[BUFSIZE];
-
+	 char* tmpval = NULL;
 	(void) fi;
 	
    	FILE *f = fopen(mpv_fullpath(pathbuf, path, BUFSIZE), "r+");
@@ -453,14 +455,35 @@ static int mpv_write(const char *path, const char *buf, size_t size,
 	    fprintf(stderr, "leet_write: fd = %d, ", fd);
 	#endif
 
-
-    char attrbuf[8];
-    ssize_t attr_len = getxattr(pathbuf, ENCRYPTED_ATTR, attrbuf, 8);
-    int encrypted = 0;
-    if(attr_len != -1 && !memcmp(attrbuf, "true", 4)){
-        encrypted = 1;
-    }
 */
+    ssize_t attr_len = getxattr(pathbuf, ENCRYPTED_ATTR, NULL, 0);
+    int encryptedFile = -1;//default pass through
+    if(attr>=0)
+    {
+	getxattr(pathbuf, ENCRYPTED_ATTR, attr_len, 0);
+	tmpval = malloc(sizeof(*tmpval)*(valsize+1));d
+	attr_len=getxattr(pathbuff, ENCRYPTED_ATTR, tmpval, valsize);
+        if(attr_len != -1 && strncmp("true",attrbuf,)
+	{
+	fprintf(stderr, "Encrypted File!\n");
+	free(tmpval);
+	attr_len=getxattr(pathbuf, IS_ENCRYPTED, NULL, 0);
+	tmpval = malloc(sizeof(*tmpval)*(valsize+1));d
+	attr_len=getxattr(pathbuff, IS_ENCRYPTED, tmpval, valsize);
+	//if it isn't currently encrypted don't do anything, but set this to true
+		if(strcmp(tmpval,"false",strlen("false"))==0) 
+		{
+		fprintf(stderr, "Not currently Encrypted!\n");
+		fsetxattr(fileno(f),IS_ENCRYPTED,"true",strlen("true"),0);
+		}
+		else
+		{
+		fprintf(stderr, "Currently Encrypted!\n");
+		encryptedFile=1;
+		}
+		free(tmpval);
+    }
+
     if(f != NULL){
         /* Decrypt file */
         //xor_do_crypt(f, (encrypted ? AES_DECRYPT : AES_PASSTHRU), state->key);
@@ -539,10 +562,18 @@ static int mpv_create(const char* path, mode_t mode, struct fuse_file_info* fi) 
 	   // mpv_state *state = (mpv_state *)(fuse_get_context()->private_data);
 	//  xor_do_crypt(res, AES_ENCRYPT, state->key);
 
-	    if(fsetxattr(fileno(res), ENCRYPTED_ATTR, "true", 4, 0)){
+	    if(fsetxattr(fileno(res), ENCRYPTED_ATTR, "true", strlen("true"), 0)){
 		return -errno;
 	    }
-
+	if(fsetxattr(fileno(res), IS_ENCRYPTED, "false", strlen("false"), 0)){
+		return -errno;
+	    }
+	char *tmpval;
+	int valuesize= getxattr(pathbuf, IS_ENCRYPTED, attr_len, 0);
+	tmpval = malloc(sizeof(*tmpval)*(valsize+1));d
+	valuesize=getxattr(pathbuff, IS_ENCRYPTED, tmpval, valsize);
+	tmpval[valsize] = '\0';
+	 fprintf(stderr, "IS_ENCRYPTED=%s \n",tmpval );
 	    fclose(res);
 
 
