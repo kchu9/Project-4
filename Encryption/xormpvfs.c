@@ -68,7 +68,16 @@ static char *mpv_fullpath(char *buf, const char *path, size_t bufsize){
     snprintf(buf, bufsize, "%s%s", state->rootdir, path);
     return buf;
 }
-
+static int mpv_setxattr(const char *path, const char *name, const char *value,
+			size_t size, int flags)
+{
+	 char buf[BUFSIZE];
+   	 int res = lsetxattr(mpv_fullpath(buf, path, BUFSIZE), name, value, 
+            size, flags);
+	if (res == -1)
+		return -errno;
+	return 0;
+}
 static int mpv_getattr(const char *path, struct stat *stbuf)
 {
 	int res;
@@ -622,16 +631,7 @@ static int mpv_fsync(const char *path, int isdatasync,
 }
 
 
-static int mpv_setxattr(const char *path, const char *name, const char *value,
-			size_t size, int flags)
-{
-	 char buf[BUFSIZE];
-   	 int res = lsetxattr(mpv_fullpath(buf, path, BUFSIZE), name, value, 
-            size, flags);
-	if (res == -1)
-		return -errno;
-	return 0;
-}
+
 
 static int mpv_getxattr(const char *path, const char *name, char *value,
 			size_t size)
