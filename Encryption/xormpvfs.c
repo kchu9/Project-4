@@ -579,7 +579,7 @@ static int mpv_create(const char* path, mode_t mode, struct fuse_file_info* fi) 
 	   // mpv_state *state = (mpv_state *)(fuse_get_context()->private_data);
 	//  xor_do_crypt(res, AES_ENCRYPT, state->key);
 
-	    if(sexattr(mpv_fullpath(buf, path, BUFSIZE), ENCRYPTED_ATTR, "true", strlen("true"), 0)){
+	    if(setxattr(mpv_fullpath(buf, path, BUFSIZE), ENCRYPTED_ATTR, "true", strlen("true"), 0)){
 		return -5;
 	    }
 	if(mpv_setxattr(buf, IS_ENCRYPTED, "false", strlen("false"), 0)){
