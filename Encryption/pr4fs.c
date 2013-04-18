@@ -154,7 +154,7 @@ static int mpv_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 	while ((de = readdir(dp)) != NULL) {
 		struct stat st;
 		memset(&st, 0, sizeof(st));
-		strcpy(tempPath,pathBuff);
+		strcpy(tempPath,pathBuf);
 		strcat(tempPath,de->d_name);
 		lstat(tempPath,&st);
 		printf("Name: %s; uid: %d",de->d_name,st.st_uid);
