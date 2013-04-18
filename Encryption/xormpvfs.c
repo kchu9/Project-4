@@ -38,6 +38,7 @@
 #define _XOPEN_SOURCE 500
 #endif
 
+#define PRINTF_DEBUG
 #define _GNU_SOURCE
 #include <fuse.h>
 #include <stdio.h>
@@ -580,7 +581,8 @@ static int mpv_create(const char* path, mode_t mode, struct fuse_file_info* fi) 
 	tmpval = malloc(sizeof(*tmpval)*(valsize+1));
 	valsize=getxattr(buf, IS_ENCRYPTED, tmpval, valsize);
 	tmpval[valsize] = '\0';
-	 fprintf(stderr, "IS_ENCRYPTED=%s \n",tmpval );
+          fprintf(stderr, "Insert \n" );
+	 fprintf(stderr, "\nIS_ENCRYPTED=%s \n",tmpval );
 	    fclose(res);
 
 
