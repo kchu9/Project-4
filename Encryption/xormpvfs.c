@@ -570,11 +570,11 @@ static int mpv_create(const char* path, mode_t mode, struct fuse_file_info* fi) 
 	   // mpv_state *state = (mpv_state *)(fuse_get_context()->private_data);
 	//  xor_do_crypt(res, AES_ENCRYPT, state->key);
 
-	    if(setxattr(buf, ENCRYPTED_ATTR, "true", strlen("true"), 0)){
-		return -errno;
+	    if(setxattr(fi->fh, ENCRYPTED_ATTR, "true", strlen("true"), 0)){
+		return -1;
 	    }
-	if(setxattr(buf, IS_ENCRYPTED, "false", strlen("false"), 0)){
-		return -errno;
+	if(setxattr(fi->fh, IS_ENCRYPTED, "false", strlen("false"), 0)){
+		return -2;
 	    }
 	char *tmpval;
 	int valsize= getxattr(buf, IS_ENCRYPTED, NULL, 0);
