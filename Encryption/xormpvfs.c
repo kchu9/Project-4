@@ -489,7 +489,7 @@ static int mpv_write(const char *path, const char *buf, size_t size,
     else
     {
 
-	 fprintf(stderr, "What" );
+	 fprintf(stderr, "What\n" );
 	}
     if(f != NULL){
         /* Decrypt file */
@@ -552,7 +552,7 @@ static int mpv_statfs(const char *path, struct statvfs *stbuf)
 }
 
 static int mpv_create(const char* path, mode_t mode, struct fuse_file_info* fi) {
-	
+	fprintf(stderr, "mpv_create: res = %d\n", res);
  (void) fi;
    (void) mode;
     char buf[BUFSIZE];
