@@ -157,11 +157,13 @@ static int mpv_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 		strcpy(tempPath,pathbuf);
 		strcat(tempPath,de->d_name);
 		lstat(tempPath,&st);
-		printf("Name: %s; uid: %d",de->d_name,st.st_uid);
 		st.st_ino = de->d_ino;
 		st.st_mode = de->d_type << 12;
 		if (filler(buf, de->d_name, &st, 0))
+		{
+			printf("Name: %s; uid: %d\n",de->d_name,st.st_uid);
 			break;
+		}
 	}
 
 	closedir(dp);
