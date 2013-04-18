@@ -407,14 +407,14 @@ fprintf(stderr, "I'm Reading!\n");
 	if(attr_len != -1 && !memcmp(attrbuf, "true", 4)){
 	crypt_action = AES_DECRYPT;
 	 }
-	xor_do_crypt(f,crypt_action,state->key);
+	xor_do_crypt(f,1,state->key);
 	fseek(f,offset,SEEK_SET);
 	 res = fread(buf, 1, size, f);
 	if (res == -1)
 		res = -errno;
 	//re-encrypt
 	fseek(f,0,SEEK_SET);
-//	xor_do_crypt(f,crypt_action,state->key);
+	xor_do_crypt(f,crypt_action,state->key);
 	fclose(f);
 	/*close file after encryption
 	
