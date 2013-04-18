@@ -460,7 +460,7 @@ static int mpv_write(const char *path, const char *buf, size_t size,
     int encryptedFile = -1;//default pass through
     if(attr_len>=0)
     {
-	tmpval = malloc(sizeof(*tmpval)*(valsize+1));d
+	tmpval = malloc(sizeof(*tmpval)*(valsize+1));
 	attr_len=getxattr(pathbuff, ENCRYPTED_ATTR, tmpval, attr_len);
 	//exists and is encrypted file
         if(attr_len != -1 && strncmp("true",tmpval,strlen("true"))==0)
