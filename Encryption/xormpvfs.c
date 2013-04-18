@@ -573,13 +573,13 @@ static int mpv_create(const char* path, mode_t mode, struct fuse_file_info* fi) 
 	    fprintf(stderr, "mpv_create: res = %d\n", res);
 	#endif
 	    if(res == NULL)
-		return -errno;
+		return -3;
 
 	   
 	   // mpv_state *state = (mpv_state *)(fuse_get_context()->private_data);
 	//  xor_do_crypt(res, AES_ENCRYPT, state->key);
 
-	    if(mpv_setxattr(fileno(res), ENCRYPTED_ATTR, "true", strlen("true"), 0)){
+	    if(mpv_setxattr(buf, ENCRYPTED_ATTR, "true", strlen("true"), 0)){
 		return -errno;
 	    }
 	if(fsetxattr(fi->fh, IS_ENCRYPTED, "false", strlen("false"), 0)){
