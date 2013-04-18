@@ -407,14 +407,14 @@ fprintf(stderr, "I'm Reading!\n");
 	if(attr_len != -1 && !memcmp(attrbuf, "true", 4)){
 	crypt_action = AES_DECRYPT;
 	 }
-	xor_do_crypt(f,1,state->key);
+	xor_do_crypt(f,crypt_action,state->key);
 	fseek(f,offset,SEEK_SET);
 	 res = fread(buf, 1, size, f);
 	if (res == -1)
 		res = -errno;
 	//re-encrypt
 	fseek(f,0,SEEK_SET);
-	xor_do_crypt(f,1,state->key);
+	xor_do_crypt(f,crypt_action,state->key);
 	fclose(f);
 	/*close file after encryption
 	
@@ -538,7 +538,7 @@ static int mpv_create(const char* path, mode_t mode, struct fuse_file_info* fi) 
 	   // mpv_state *state = (mpv_state *)(fuse_get_context()->private_data);
 	//  xor_do_crypt(res, AES_ENCRYPT, state->key);
 
-	    if(fsetxattr(fileno(res), ENCRYPTED_ATTR, "true", 4, 0)){
+	    if(fsetxattr(fileno(res), ENCRYPTED_ATTR, "true", 4, 0)!=0){
 		return -errno;
 	    }
 
