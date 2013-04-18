@@ -617,6 +617,7 @@ static int mpv_release(const char *path, struct fuse_file_info *fi)
 
 	(void) path;
 	(void) fi;
+	 mpv_state *state = (mpv_state *)(fuse_get_context()->private_data);
 	FILE * f ;
 	f= fopen(mpv_fullpath(pathbuf, path, BUFSIZE), "r");
 	if(f==NULL)
