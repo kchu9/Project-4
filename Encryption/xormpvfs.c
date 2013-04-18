@@ -438,12 +438,14 @@ static int mpv_write(const char *path, const char *buf, size_t size,
 
 //TODO add encryption/decryption
 	//int fd;
+	   fprintf(stderr, "I'm writing!\n");
 	int res;
 	char pathbuf[BUFSIZE];
 
 	(void) fi;
 	
    	FILE *f = fopen(mpv_fullpath(pathbuf, path, BUFSIZE), "r+");
+	fprintf(stderr, "File open!\n");
 	mpv_state *state = (mpv_state *)(fuse_get_context()->private_data);
 	/*#ifdef PRINTF_DEBUG
 	    fprintf(stderr, "leet_write: fd = %d, ", fd);
