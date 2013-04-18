@@ -482,6 +482,7 @@ static int mpv_write(const char *path, const char *buf, size_t size,
 		encryptedFile=1;
 		}
 		free(tmpval);
+	}
     }
 
     if(f != NULL){
