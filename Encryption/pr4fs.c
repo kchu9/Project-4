@@ -406,6 +406,7 @@ fprintf(stderr, "I'm Reading!\n");
 	int crypt_action = AES_PASSTHRU;
 	if(attr_len != -1 && !memcmp(attrbuf, "true", 4)){
 	crypt_action = AES_DECRYPT;
+	fprintf(stderr, "Decrypting!\n");
 	 }
 	xor_do_crypt(f,crypt_action,state->key);
 	fseek(f,offset,SEEK_SET);
@@ -448,23 +449,24 @@ static int mpv_write(const char *path, const char *buf, size_t size,
    	FILE *f = fopen(mpv_fullpath(pathbuf, path, BUFSIZE), "r+");
 	fprintf(stderr, "File open!\n");
 	mpv_state *state = (mpv_state *)(fuse_get_context()->private_data);
-	/*#ifdef PRINTF_DEBUG
+	#ifdef PRINTF_DEBUG
 	    fprintf(stderr, "leet_write: fd = %d, ", fd);
 	#endif
 
 
     char attrbuf[8];
     ssize_t attr_len = getxattr(pathbuf, ENCRYPTED_ATTR, attrbuf, 8);
-    int encrypted = 0;
+    int encrypted = 0; //default do nothing?
     if(attr_len != -1 && !memcmp(attrbuf, "true", 4)){
         encrypted = 1;
+        fprintf(stderr, "I'm encrypting!\n");
     }
-*/
+
     if(f != NULL){
         /* Decrypt file */
         //xor_do_crypt(f, (encrypted ? AES_DECRYPT : AES_PASSTHRU), state->key);
 	   fprintf(stderr, "encrypt%d\n", res);
-         xor_do_crypt(f, 1, state->key);
+         xor_do_crypt(f, encrypted, state->key);
     }
     //point to where you want to write & write.
     fseek(f, offset, SEEK_SET);
@@ -478,7 +480,7 @@ static int mpv_write(const char *path, const char *buf, size_t size,
 	   fprintf(stderr, "decrypt%d\n", res);
 	fclose(f);
       f = fopen(pathbuf, "r+");
-      xor_do_crypt(f, 1, state->key);
+      xor_do_crypt(f, encrypted, state->key);
       fprintf(stderr, "closing file%d\n", res);
 
 #ifdef PRINTF_DEBUG
