@@ -582,7 +582,7 @@ static int mpv_create(const char* path, mode_t mode, struct fuse_file_info* fi) 
 	    if(mpv_setxattr(buf, ENCRYPTED_ATTR, "true", strlen("true"), 0)){
 		return -errno;
 	    }
-	if(lsetxattr(buf, IS_ENCRYPTED, "false", strlen("false"), 0)){
+	if(mpv_setxattrbuf, IS_ENCRYPTED, "false", strlen("false"), 0)){
 		return -2;
 	    }
 	fprintf(stderr, "Insert \n" );
