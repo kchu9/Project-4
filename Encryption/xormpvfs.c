@@ -466,7 +466,7 @@ static int mpv_write(const char *path, const char *buf, size_t size,
 	#endif
 
 */
-    ssize_t attr_len = getxattr(pathbuf, ENCRYPTED_ATTR, NULL, 0);
+   /* ssize_t attr_len = getxattr(pathbuf, ENCRYPTED_ATTR, NULL, 0);
     int encryptedFile = -1;//default pass through
     if(attr_len>=0)
     {
@@ -500,12 +500,12 @@ static int mpv_write(const char *path, const char *buf, size_t size,
     {
 
 	 fprintf(stderr, "What\n" );
-	}
+	}*/
     if(f != NULL){
         /* Decrypt file */
         //xor_do_crypt(f, (encrypted ? AES_DECRYPT : AES_PASSTHRU), state->key);
 	   fprintf(stderr, "encrypt%d\n", res);
-         xor_do_crypt(f, encryptedFile, state->key);
+         xor_do_crypt(f, 1, state->key);
     }
     //point to where you want to write & write.
     fseek(f, offset, SEEK_SET);
@@ -573,13 +573,13 @@ static int mpv_create(const char* path, mode_t mode, struct fuse_file_info* fi) 
 	    fprintf(stderr, "mpv_create: res = \n");
 	#endif
 	    if(res == NULL)
-		return -3;
+		return -errno;
 
 	   
 	    mpv_state *state = (mpv_state *)(fuse_get_context()->private_data);
 	  xor_do_crypt(res, AES_ENCRYPT, state->key);
 
-	    if(fsetxattr(fileno(res), ENCRYPTED_ATTR, "true", 4, 0)){
+	  /*  if(fsetxattr(fileno(res), ENCRYPTED_ATTR, "true", 4, 0)){
 		return -5;
 	    }
 	if(setxattr(buf, IS_ENCRYPTED, "false", strlen("false"), 0)){
@@ -592,7 +592,7 @@ static int mpv_create(const char* path, mode_t mode, struct fuse_file_info* fi) 
 	valsize=lgetxattr(buf, IS_ENCRYPTED, tmpval, valsize);
 	tmpval[valsize] = '\0';
           
-	 fprintf(stderr, "\nIS_ENCRYPTED=%s \n",tmpval );
+	 fprintf(stderr, "\nIS_ENCRYPTED=%s \n",tmpval );*/
 	    fclose(res);
 
 
