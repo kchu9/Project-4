@@ -358,8 +358,8 @@ static int mpv_open(const char *path, struct fuse_file_info *fi)
 	#endif
 	if (res == -1)
 		return -errno;
-	fi->fh=res;
-	//close(res);
+
+	close(res);
 	return 0;
 }
 
