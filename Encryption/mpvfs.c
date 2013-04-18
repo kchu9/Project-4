@@ -487,7 +487,7 @@ static int mpv_write(const char *path, const char *buf, size_t size,
 #endif
     res = fwrite(buf, 1, size, memstream);
     fflush(memstream);
-	fclose(f)
+	fclose(f);
     f = fopen(pathbuf, "w");
 
     /* Always encrypt the file data */
