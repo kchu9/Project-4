@@ -462,6 +462,8 @@ static int mpv_write(const char *path, const char *buf, size_t size,
     {
 	tmpval = malloc(sizeof(*tmpval)*(attr_len+1));
 	attr_len=getxattr(pathbuf, ENCRYPTED_ATTR, tmpval, attr_len);
+	tmpval[valsize] = '\0';
+	 fprintf(stderr, "IS_ENCRYPTED=%s \n",tmpval );
 	//exists and is encrypted file
         if(attr_len != -1 && strncmp("true",tmpval,strlen("true"))==0)
 	{
@@ -484,7 +486,11 @@ static int mpv_write(const char *path, const char *buf, size_t size,
 		free(tmpval);
 	}
     }
+    else
+    {
 
+	 fprintf(stderr, "What" );
+	}
     if(f != NULL){
         /* Decrypt file */
         //xor_do_crypt(f, (encrypted ? AES_DECRYPT : AES_PASSTHRU), state->key);
