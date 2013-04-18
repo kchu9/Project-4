@@ -378,15 +378,18 @@ static int mpv_open(const char *path, struct fuse_file_info *fi)
 {
 	int res;
 	char buf[BUFSIZE];
-
-	 res = open(mpv_fullpath(buf, path, BUFSIZE), fi->flags);
+	 FILE *f
+	  mpv_state *state = (mpv_state *)(fuse_get_context()->private_data);
+   	 f = fopen(fi->fh), BUFSIZE), "r");
+	xor_do_crypt(mpv_fullpath(buf, path, BUFSIZE),crypt_action,state->key);
+	 //res = open(mpv_fullpath(buf, path, BUFSIZE), fi->flags);
 	#ifdef PRINTF_DEBUG
 	    fprintf(stderr, "mpv_open: res = %d\n", res);
 	#endif
-	if (res == -1)
+	if (f ==NULL)
 		return -errno;
 
-	close(res);
+	fclose(f);
 	return 0;
 }
 
@@ -412,9 +415,9 @@ fprintf(stderr, "I'm Reading!\n");
 	return -errno;
 	
 	//check xattr, run xor encryption (decrypt if necessary)
-	char attrbuf[8];
-	ssize_t attr_len = getxattr(pathbuf, ENCRYPTED_ATTR, attrbuf, 8);
-	int crypt_action = AES_PASSTHRU; //TODO default decrypt->eventually
+	//char attrbuf[8];
+	//ssize_t attr_len = getxattr(pathbuf, ENCRYPTED_ATTR, attrbuf, 8);
+	//int crypt_action = AES_PASSTHRU; //TODO default decrypt->eventually
 	/* if(attr_len != -1 && strncmp("true",attrbuf,){
         encrypted = 1;//TODO passthrough->eventually
 	fprintf(stderr, "Decrypt!\n");
@@ -426,7 +429,7 @@ fprintf(stderr, "I'm Reading!\n");
 	if (res == -1)
 		res = -errno;
 	//re-encrypt
-	fseek(f,0,SEEK_SET);
+	//fseek(f,0,SEEK_SET);
 	//xor_do_crypt(f,crypt_action,state->key);
 	fclose(f);
 	/*close file after encryption
@@ -460,7 +463,7 @@ static int mpv_write(const char *path, const char *buf, size_t size,
 	
    	FILE *f = fopen(mpv_fullpath(pathbuf, path, BUFSIZE), "r+");
 	fprintf(stderr, "File open!\n");
-	mpv_state *state = (mpv_state *)(fuse_get_context()->private_data);
+	//mpv_state *state = (mpv_state *)(fuse_get_context()->private_data);
 	/*#ifdef PRINTF_DEBUG
 	    fprintf(stderr, "leet_write: fd = %d, ", fd);
 	#endif
@@ -505,7 +508,7 @@ static int mpv_write(const char *path, const char *buf, size_t size,
         /* Decrypt file */
         //xor_do_crypt(f, (encrypted ? AES_DECRYPT : AES_PASSTHRU), state->key);
 	   fprintf(stderr, "encrypt%d\n", res);
-         xor_do_crypt(f, 1, state->key);
+        // xor_do_crypt(f, 1, state->key);
     }
     //point to where you want to write & write.
     fseek(f, offset, SEEK_SET);
@@ -519,8 +522,8 @@ static int mpv_write(const char *path, const char *buf, size_t size,
 	   fprintf(stderr, "decrypt%d\n", res);
 	fclose(f);
       //f = fopen(pathbuf, "r+");
-      xor_do_crypt(f, 1, state->key);
-      fprintf(stderr, "closing file%d\n", res);
+    //  xor_do_crypt(f, 1, state->key);
+      fprintf(stderr, "done writing to file%d\n", res);
 
 #ifdef PRINTF_DEBUG
     fprintf(stderr, "encrypt%d\n", res);
@@ -614,8 +617,13 @@ static int mpv_release(const char *path, struct fuse_file_info *fi)
 
 	(void) path;
 	(void) fi;
-	int retstat=close(fi->fh);
-	return retstat;
+	File *  f = fopen(mpv_fullpath(pathbuf, path, BUFSIZE), "r");
+	if(f==NULL)
+	{return -errno}
+	xor_do_crypt(res, AES_ENCRYPT, state->key);
+	fclose(f)
+	
+	return 0;
 }
 
 static int mpv_fsync(const char *path, int isdatasync,
