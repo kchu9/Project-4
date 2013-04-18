@@ -380,8 +380,8 @@ static int mpv_open(const char *path, struct fuse_file_info *fi)
 	char buf[BUFSIZE];
 	 FILE *f;
 	  mpv_state *state = (mpv_state *)(fuse_get_context()->private_data);
-   	 f = fopen(fi->fh), BUFSIZE), "r");
-	xor_do_crypt(mpv_fullpath(buf, path, BUFSIZE),crypt_action,state->key);
+   	 f = fopen(mpv_fullpath(buf, path, BUFSIZE), BUFSIZE), "r");
+	xor_do_crypt(f,crypt_action,state->key);
 	 //res = open(mpv_fullpath(buf, path, BUFSIZE), fi->flags);
 	#ifdef PRINTF_DEBUG
 	    fprintf(stderr, "mpv_open: res = %d\n", res);
