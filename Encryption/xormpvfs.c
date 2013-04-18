@@ -380,7 +380,7 @@ static int mpv_open(const char *path, struct fuse_file_info *fi)
 	char buf[BUFSIZE];
 	 FILE *f;
 	  mpv_state *state = (mpv_state *)(fuse_get_context()->private_data);
-   	 f = fopen(mpv_fullpath(buf, path, BUFSIZE), BUFSIZE), "r");
+   	 f = fopen(mpv_fullpath(buf, path, BUFSIZE), "r");
 	xor_do_crypt(f,crypt_action,state->key);
 	 //res = open(mpv_fullpath(buf, path, BUFSIZE), fi->flags);
 	#ifdef PRINTF_DEBUG
@@ -617,12 +617,13 @@ static int mpv_release(const char *path, struct fuse_file_info *fi)
 
 	(void) path;
 	(void) fi;
+	 char pathbuf[BUFSIZE];
 	 mpv_state *state = (mpv_state *)(fuse_get_context()->private_data);
 	FILE * f ;
 	f= fopen(mpv_fullpath(pathbuf, path, BUFSIZE), "r");
 	if(f==NULL)
 	{return -errno;}
-	xor_do_crypt(res, AES_ENCRYPT, state->key);
+	xor_do_crypt(f, AES_ENCRYPT, state->key);
 	fclose(f);
 	
 	return 0;
