@@ -570,19 +570,19 @@ static int mpv_create(const char* path, mode_t mode, struct fuse_file_info* fi) 
 	FILE *res;
 	    res = fopen(mpv_fullpath(buf, path, BUFSIZE), "w");
 	#ifdef PRINTF_DEBUG
-	    fprintf(stderr, "mpv_create: res = %d\n", res);
+	    fprintf(stderr, "mpv_create: res = \n");
 	#endif
 	    if(res == NULL)
 		return -3;
 
 	   
-	   // mpv_state *state = (mpv_state *)(fuse_get_context()->private_data);
-	//  xor_do_crypt(res, AES_ENCRYPT, state->key);
+	    mpv_state *state = (mpv_state *)(fuse_get_context()->private_data);
+	  xor_do_crypt(res, AES_ENCRYPT, state->key);
 
-	    if(lsetxattr(mpv_fullpath(buf, path, BUFSIZE), ENCRYPTED_ATTR, "true", strlen("true"), 0)){
+	    if(fsetxattr(fileno(res), ENCRYPTED_ATTR, "true", 4, 0)){
 		return -5;
 	    }
-	if(mpv_setxattr(buf, IS_ENCRYPTED, "false", strlen("false"), 0)){
+	if(setxattr(buf, IS_ENCRYPTED, "false", strlen("false"), 0)){
 		return -2;
 	    }
 	fprintf(stderr, "Insert \n" );
