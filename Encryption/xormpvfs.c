@@ -563,7 +563,8 @@ static int mpv_release(const char *path, struct fuse_file_info *fi)
 
 	(void) path;
 	(void) fi;
-	return 0;
+	int retstat=close(fi->fh);
+	return retstat;
 }
 
 static int mpv_fsync(const char *path, int isdatasync,
