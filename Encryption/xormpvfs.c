@@ -388,7 +388,7 @@ static int mpv_open(const char *path, struct fuse_file_info *fi)
 	#endif
 	if (f ==NULL)
 		return -errno;
-
+	fprintf(stderr,"encrypt\n");
 	fclose(f);
 	return 0;
 }
@@ -624,6 +624,7 @@ static int mpv_release(const char *path, struct fuse_file_info *fi)
 	if(f==NULL)
 	{return -errno;}
 	xor_do_crypt(f, AES_ENCRYPT, state->key);
+	fprintf(stderr,"encrypt\n");
 	fclose(f);
 	
 	return 0;
