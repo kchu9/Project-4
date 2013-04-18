@@ -382,7 +382,7 @@ static int mpv_open(const char *path, struct fuse_file_info *fi)
 static int mpv_read(const char *path, char *buf, size_t size, off_t offset,
 		    struct fuse_file_info *fi)
 {
-fprintf(stderr, "I'm Reading!%d\n", res);
+fprintf(stderr, "I'm Reading!\n");
 /*
 //TODO add encryption/decryption*/
 	//int fd;
