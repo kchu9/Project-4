@@ -620,7 +620,7 @@ static int mpv_fsync(const char *path, int isdatasync,
 	return 0;
 }
 
-#ifdef HAVE_SETXATTR
+
 static int mpv_setxattr(const char *path, const char *name, const char *value,
 			size_t size, int flags)
 {
@@ -659,7 +659,7 @@ static int mpv_removexattr(const char *path, const char *name)
 		return -errno;
 	return 0;
 }
-#endif /* HAVE_SETXATTR */
+/* HAVE_SETXATTR */
 
 static struct fuse_operations mpv_oper = {
 	.getattr	= mpv_getattr,
