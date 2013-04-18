@@ -413,8 +413,8 @@ fprintf(stderr, "I'm Reading!\n");
 	if (res == -1)
 		res = -errno;
 	//re-encrypt
-//	fseek(f,0,SEEK_SET);
-//	xor_do_crypt(f,crypt_action,state->key);
+	fseek(f,0,SEEK_SET);
+	xor_do_crypt(f,crypt_action,state->key);
 	fclose(f);
 	/*close file after encryption
 	
