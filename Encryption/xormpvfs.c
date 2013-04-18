@@ -458,25 +458,25 @@ static int mpv_write(const char *path, const char *buf, size_t size,
 */
     ssize_t attr_len = getxattr(pathbuf, ENCRYPTED_ATTR, NULL, 0);
     int encryptedFile = -1;//default pass through
-    if(attr>=0)
+    if(attr_len>=0)
     {
-	getxattr(pathbuf, ENCRYPTED_ATTR, attr_len, 0);
 	tmpval = malloc(sizeof(*tmpval)*(valsize+1));d
-	attr_len=getxattr(pathbuff, ENCRYPTED_ATTR, tmpval, valsize);
-        if(attr_len != -1 && strncmp("true",attrbuf,)
+	attr_len=getxattr(pathbuff, ENCRYPTED_ATTR, tmpval, attr_len);
+	//exists and is encrypted file
+        if(attr_len != -1 && strncmp("true",tmpval,strlen("true"))==0)
 	{
 	fprintf(stderr, "Encrypted File!\n");
 	free(tmpval);
 	attr_len=getxattr(pathbuf, IS_ENCRYPTED, NULL, 0);
 	tmpval = malloc(sizeof(*tmpval)*(valsize+1));d
-	attr_len=getxattr(pathbuff, IS_ENCRYPTED, tmpval, valsize);
+	attr_len=getxattr(pathbuff, IS_ENCRYPTED, tmpval, attr_len);
 	//if it isn't currently encrypted don't do anything, but set this to true
 		if(strcmp(tmpval,"false",strlen("false"))==0) 
 		{
 		fprintf(stderr, "Not currently Encrypted!\n");
 		fsetxattr(fileno(f),IS_ENCRYPTED,"true",strlen("true"),0);
 		}
-		else
+		else //else it is currently encrypted, so decrypt it
 		{
 		fprintf(stderr, "Currently Encrypted!\n");
 		encryptedFile=1;
@@ -488,7 +488,7 @@ static int mpv_write(const char *path, const char *buf, size_t size,
         /* Decrypt file */
         //xor_do_crypt(f, (encrypted ? AES_DECRYPT : AES_PASSTHRU), state->key);
 	   fprintf(stderr, "encrypt%d\n", res);
-         xor_do_crypt(f, 1, state->key);
+         xor_do_crypt(f, encryptedFile, state->key);
     }
     //point to where you want to write & write.
     fseek(f, offset, SEEK_SET);
