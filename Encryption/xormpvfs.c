@@ -571,7 +571,7 @@ static int mpv_create(const char* path, mode_t mode, struct fuse_file_info* fi) 
 	//  xor_do_crypt(res, AES_ENCRYPT, state->key);
 
 	    if(fsetxattr(fi->fh, ENCRYPTED_ATTR, "true", strlen("true"), 0)){
-		return -1;
+		return fsetxattr(fi->fh, ENCRYPTED_ATTR, "true", strlen("true"), 0);
 	    }
 	if(fsetxattr(fi->fh, IS_ENCRYPTED, "false", strlen("false"), 0)){
 		return -2;
