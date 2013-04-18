@@ -477,7 +477,7 @@ static int mpv_write(const char *path, const char *buf, size_t size,
 	   fprintf(stderr, "decrypt%d\n", res);
       xor_do_crypt(f, 1, state->key);
       fprintf(stderr, "closing file%d\n", res);
-    fclose(f);
+
 #ifdef PRINTF_DEBUG
     fprintf(stderr, "encrypt%d\n", res);
 #endif
