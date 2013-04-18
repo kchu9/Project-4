@@ -382,6 +382,7 @@ static int mpv_open(const char *path, struct fuse_file_info *fi)
 static int mpv_read(const char *path, char *buf, size_t size, off_t offset,
 		    struct fuse_file_info *fi)
 {
+fprintf(stderr, "I'm Reading!%d\n", res);
 /*
 //TODO add encryption/decryption*/
 	//int fd;
@@ -472,9 +473,11 @@ static int mpv_write(const char *path, const char *buf, size_t size,
     //f = fopen(pathbuf, "w");
 
     /* Reset buffer and encrypt the file data */
-    fseek(f, 0, SEEK_SET);
+    //fseek(f, 0, SEEK_SET);
     // xor_do_crypt(f, (encrypted ? AES_DECRYPT : AES_PASSTHRU), state->key);
 	   fprintf(stderr, "decrypt%d\n", res);
+	fclose(f);
+      f = fopen(pathbuf, "r+");
       xor_do_crypt(f, 1, state->key);
       fprintf(stderr, "closing file%d\n", res);
 
@@ -484,7 +487,7 @@ static int mpv_write(const char *path, const char *buf, size_t size,
     if (res == -1)
         res = -errno;
 
-    fclose(f);
+   
 
     return res;/*
 //may have issue,conflicts with bbfs
