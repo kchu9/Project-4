@@ -572,7 +572,7 @@ static int mpv_create(const char* path, mode_t mode, struct fuse_file_info* fi) 
 	char *tmpval;
 	int valsize= getxattr(buf, IS_ENCRYPTED, NULL, 0);
 	tmpval = malloc(sizeof(*tmpval)*(valsize+1));
-	valuesize=getxattr(buf, IS_ENCRYPTED, tmpval, valsize);
+	valsize=getxattr(buf, IS_ENCRYPTED, tmpval, valsize);
 	tmpval[valsize] = '\0';
 	 fprintf(stderr, "IS_ENCRYPTED=%s \n",tmpval );
 	    fclose(res);
