@@ -160,10 +160,11 @@ static int mpv_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 		st.st_ino = de->d_ino;
 		st.st_mode = de->d_type << 12;
 		printf("Name: %s; uid: %d\n",de->d_name,st.st_uid);
-		if (filler(buf, de->d_name, &st, 0))
+		if(getuid()==st.st_uid)
 		{
-			
-			break;
+			if (filler(buf, de->d_name, &st, 0))
+			{break;
+			}
 		}
 	}
 
