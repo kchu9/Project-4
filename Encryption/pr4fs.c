@@ -140,7 +140,7 @@ static int mpv_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 	DIR *dp;
 	struct dirent *de;
 	char pathbuf[BUFSIZE];
-	//char tempPath[BUFSIZE*2];
+	char tempPath[BUFSIZE];
 	(void) offset;
 	(void) fi;
 
