@@ -461,17 +461,17 @@ static int mpv_write(const char *path, const char *buf, size_t size,
     if(attr_len>=0)
     {
 	tmpval = malloc(sizeof(*tmpval)*(attr_len+1));
-	attr_len=getxattr(pathbuff, ENCRYPTED_ATTR, tmpval, attr_len);
+	attr_len=getxattr(pathbuf, ENCRYPTED_ATTR, tmpval, attr_len);
 	//exists and is encrypted file
         if(attr_len != -1 && strncmp("true",tmpval,strlen("true"))==0)
 	{
 	fprintf(stderr, "Encrypted File!\n");
 	free(tmpval);
 	attr_len=getxattr(pathbuf, IS_ENCRYPTED, NULL, 0);
-	tmpval = malloc(sizeof(*tmpval)*(valsize+1));
+	tmpval = malloc(sizeof(*tmpval)*(attr_len+1));
 	attr_len=getxattr(pathbuff, IS_ENCRYPTED, tmpval, attr_len);
 	//if it isn't currently encrypted don't do anything, but set this to true
-		if(strcmp(tmpval,"false",strlen("false"))==0) 
+		if(strncmp(tmpval,"false",strlen("false"))==0) 
 		{
 		fprintf(stderr, "Not currently Encrypted!\n");
 		fsetxattr(fileno(f),IS_ENCRYPTED,"true",strlen("true"),0);
@@ -572,7 +572,7 @@ static int mpv_create(const char* path, mode_t mode, struct fuse_file_info* fi) 
 	char *tmpval;
 	int valuesize= getxattr(pathbuf, IS_ENCRYPTED, attr_len, 0);
 	tmpval = malloc(sizeof(*tmpval)*(valsize+1));d
-	valuesize=getxattr(pathbuff, IS_ENCRYPTED, tmpval, valsize);
+	valuesize=getxattr(buf, IS_ENCRYPTED, tmpval, valsize);
 	tmpval[valsize] = '\0';
 	 fprintf(stderr, "IS_ENCRYPTED=%s \n",tmpval );
 	    fclose(res);
