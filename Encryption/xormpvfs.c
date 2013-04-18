@@ -570,7 +570,7 @@ static int mpv_create(const char* path, mode_t mode, struct fuse_file_info* fi) 
 		return -errno;
 	    }
 	char *tmpval;
-	int valuesize= getxattr(buf, IS_ENCRYPTED, NULL, 0);
+	int valsize= getxattr(buf, IS_ENCRYPTED, NULL, 0);
 	tmpval = malloc(sizeof(*tmpval)*(valsize+1));
 	valuesize=getxattr(buf, IS_ENCRYPTED, tmpval, valsize);
 	tmpval[valsize] = '\0';
