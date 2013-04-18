@@ -358,8 +358,8 @@ static int mpv_open(const char *path, struct fuse_file_info *fi)
 	#endif
 	if (res == -1)
 		return -errno;
-
-	close(res);
+	fi->fh=res;
+	//close(res);
 	return 0;
 }
 
@@ -487,6 +487,7 @@ static int mpv_write(const char *path, const char *buf, size_t size,
 #endif
     res = fwrite(buf, 1, size, memstream);
     fflush(memstream);
+	fclose(f)
     f = fopen(pathbuf, "w");
 
     /* Always encrypt the file data */
@@ -568,8 +569,8 @@ static int mpv_release(const char *path, struct fuse_file_info *fi)
 	   unimplemented */
 
 	(void) path;
-	(void) fi;
-	return 0;
+	int retstat=close(fi->fh);
+	return retstat;
 }
 
 static int mpv_fsync(const char *path, int isdatasync,
