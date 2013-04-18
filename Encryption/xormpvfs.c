@@ -406,6 +406,7 @@ fprintf(stderr, "I'm Reading!\n");
 	int crypt_action = AES_PASSTHRU;
 	if(attr_len != -1 && !memcmp(attrbuf, "true", 4)){
 	crypt_action = AES_DECRYPT;
+	fprintf(stderr, "Decrypt!\n");
 	 }
 	xor_do_crypt(f,crypt_action,state->key);
 	fseek(f,offset,SEEK_SET);
@@ -473,11 +474,11 @@ static int mpv_write(const char *path, const char *buf, size_t size,
     //f = fopen(pathbuf, "w");
 
     /* Reset buffer and encrypt the file data */
-    //fseek(f, 0, SEEK_SET);
+    fseek(f, 0, SEEK_SET);
     // xor_do_crypt(f, (encrypted ? AES_DECRYPT : AES_PASSTHRU), state->key);
 	   fprintf(stderr, "decrypt%d\n", res);
 	fclose(f);
-      f = fopen(pathbuf, "r+");
+      //f = fopen(pathbuf, "r+");
       xor_do_crypt(f, 1, state->key);
       fprintf(stderr, "closing file%d\n", res);
 
