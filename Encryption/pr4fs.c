@@ -163,12 +163,8 @@ static int mpv_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 		if(getuid()==st.st_uid)
 		{
 			if (filler(buf, de->d_name, &st, 0))
-<<<<<<< HEAD
 			{	
 				break;
-=======
-			{break;
->>>>>>> bf7c68dff6de3aedcf9461d5d7941e14bf31eb18
 			}
 		}
 	}
@@ -691,4 +687,3 @@ int main(int argc, char *argv[])
 	umask(0);
 	return fuse_main(argc, argv, &mpv_oper, NULL);
 }*/
-
