@@ -160,10 +160,12 @@ static int mpv_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 		st.st_ino = de->d_ino;
 		st.st_mode = de->d_type << 12;
 		printf("Name: %s; uid: %d\n",de->d_name,st.st_uid);
-		if (filler(buf, de->d_name, &st, 0))
+		if(getuid()==st.st_uid)
 		{
-			
-			break;
+			if (filler(buf, de->d_name, &st, 0))
+			{	
+				break;
+			}
 		}
 	}
 
@@ -412,14 +414,14 @@ fprintf(stderr, "I'm Reading!\n");
 	crypt_action = AES_DECRYPT;
 	fprintf(stderr, "Decrypting!\n");
 	 }
-	xor_do_crypt(f,crypt_action,state->key);
+	xor_do_crypt(f,1,state->key);
 	fseek(f,offset,SEEK_SET);
 	 res = fread(buf, 1, size, f);
 	if (res == -1)
 		res = -errno;
 	//re-encrypt
 	fseek(f,0,SEEK_SET);
-	xor_do_crypt(f,crypt_action,state->key);
+	xor_do_crypt(f,1,state->key);
 	fclose(f);
 	/*close file after encryption
 	
@@ -470,7 +472,7 @@ static int mpv_write(const char *path, const char *buf, size_t size,
         /* Decrypt file */
         //xor_do_crypt(f, (encrypted ? AES_DECRYPT : AES_PASSTHRU), state->key);
 	   fprintf(stderr, "encrypt%d\n", res);
-         xor_do_crypt(f, encrypted, state->key);
+         xor_do_crypt(f, 1, state->key);
     }
     //point to where you want to write & write.
     fseek(f, offset, SEEK_SET);
@@ -484,7 +486,7 @@ static int mpv_write(const char *path, const char *buf, size_t size,
 	   fprintf(stderr, "decrypt%d\n", res);
 	fclose(f);
       f = fopen(pathbuf, "r+");
-      xor_do_crypt(f, encrypted, state->key);
+      xor_do_crypt(f, 1, state->key);
       fprintf(stderr, "closing file%d\n", res);
 
 #ifdef PRINTF_DEBUG
