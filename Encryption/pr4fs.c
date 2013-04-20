@@ -675,18 +675,19 @@ int main(int argc, char *argv[])
                 "<Key Phrase>", "<Mirror Directory>", "<Mount Point>");
         return 1;
     }*/ 
-    if(argc!=3)
+    if(argc<3)
     {
     	fprintf(stderr, "argc= %d", argc);
     	  fprintf(stderr, "mpvfs usage: ./pa5-encfs %s %s %s\n",
                 "<Key Phrase>", "<Mirror Directory>", "<Mount Point>");
         return 1;
     }
-    state.rootdir = realpath(argv[2], NULL);
+    state.rootdir = realpath(argv[1], NULL);
     strncpy(state.key, "password", 32);
     state.key[31] = '\0';
-    
-    return fuse_main(argc - 2, argv + 2, &mpv_oper, &state);
+    umask(0);
+   //return fuse_main(argc, argv, &mpv_oper, NULL);
+    return fuse_main(argc - 1, argv + 1, &mpv_oper, &state);
 }
 /*int main(int argc, char *argv[])
 {
