@@ -682,7 +682,7 @@ int main(int argc, char *argv[])
         return 1;
     }
     state.rootdir = realpath(argv[2], NULL);
-    strncpy(state.key, 'password', 32);
+    strncpy(state.key, "password", 32);
     state.key[31] = '\0';
     
     return fuse_main(argc - 2, argv + 2, &mpv_oper, &state);
