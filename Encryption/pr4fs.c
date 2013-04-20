@@ -675,7 +675,7 @@ int main(int argc, char *argv[])
                 "<Key Phrase>", "<Mirror Directory>", "<Mount Point>");
         return 1;
     }*/ 
-    if(argc!=2)
+    if(argc!=3)
     {
     	  fprintf(stderr, "mpvfs usage: ./pa5-encfs %s %s %s\n",
                 "<Key Phrase>", "<Mirror Directory>", "<Mount Point>");
