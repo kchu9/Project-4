@@ -660,24 +660,29 @@ int main(int argc, char *argv[])
 {
     umask(0);
     mpv_state state;
-
-    if(argc < 4){
+ 
+   /* if(argc < 4){
 #ifdef SECURE_KEYPHRASE
         if(argc == 3){
-            /* TODO: implement a secure key phrase input technique */
+            /*TODO: implement a secure key phrase input technique 
 
         }else{
-            /* TODO: Fail or implement defaults */
+            /* TODO: Fail or implement defaults 
 
         }
 #endif
         fprintf(stderr, "mpvfs usage: ./pa5-encfs %s %s %s\n",
                 "<Key Phrase>", "<Mirror Directory>", "<Mount Point>");
         return 1;
+    }*/ 
+    if(argc!=2)
+    {
+    	  fprintf(stderr, "mpvfs usage: ./pa5-encfs %s %s %s\n",
+                "<Key Phrase>", "<Mirror Directory>", "<Mount Point>");
+        return 1;
     }
-
     state.rootdir = realpath(argv[2], NULL);
-    strncpy(state.key, argv[1], 32);
+    strncpy(state.key, 'password', 32);
     state.key[31] = '\0';
     
     return fuse_main(argc - 2, argv + 2, &mpv_oper, &state);
