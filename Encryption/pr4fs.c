@@ -54,6 +54,8 @@
 
 //#include "xor-crypt.h"
 #include "xor-crypt.c"
+#include "grp.h"
+#include "pwd.h"
 
 typedef struct {
     char *rootdir;
@@ -62,8 +64,24 @@ typedef struct {
 } mpv_state;
 
 static char *mpv_fullpath(char *buf, const char *path, size_t bufsize){
+	char npath[BUFSIZE];	
+	int i;
+	printf("MVP_FULLPATH: %s\n", path);
+	for(i = 0; path[i] != '\0'; i++) {
+		if(path[i] != '/' && path[i] != '.') {
+			npath[i] = path[i] ^ 'A';
+			if(npath[i] == '/' || npath[i] == '.')
+				npath[i] = npath[i] ^ 'A';
+		}
+		else
+			npath[i] = path[i];
+	}
+	npath[i] = '\0';
+	
+
     mpv_state *state = (mpv_state *)(fuse_get_context()->private_data);
-    snprintf(buf, bufsize, "%s%s", state->rootdir, path);
+    snprintf(buf, bufsize, "%s%s", state->rootdir, npath);
+	printf("MVP FULLPATH: %s, %s\n", state->rootdir, npath);
     return buf;
 }
 
@@ -133,6 +151,18 @@ static int mpv_readlink(const char *path, char *buf, size_t size)
 	return 0;
 }
 
+static int is_group_member(struct stat st, uid_t cuid) {
+	struct group *t_group;
+	int i;
+	t_group = getgrgid(st.st_gid);
+
+	for(i = 0; t_group->gr_mem[i] != '\0'; i++) {
+		if(getpwnam(t_group->gr_mem[i])->pw_uid == cuid)
+			return 1;
+	}
+
+	return 0;
+}
 
 static int mpv_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 		       off_t offset, struct fuse_file_info *fi)
@@ -141,8 +171,13 @@ static int mpv_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 	struct dirent *de;
 	char pathbuf[BUFSIZE];
 	char tempPath[BUFSIZE];
+	char newPath[BUFSIZE];
+	char slash[] = "/";
 	(void) offset;
 	(void) fi;
+	int i;
+
+	uid_t cuid = getuid();
 
 	  dp = opendir(mpv_fullpath(pathbuf, path, BUFSIZE));
 	#ifdef PRINTF_DEBUG
@@ -155,20 +190,28 @@ static int mpv_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 		struct stat st;
 		memset(&st, 0, sizeof(st));
 		strcpy(tempPath,pathbuf);
+		strcat(tempPath, slash);
 		strcat(tempPath,de->d_name);
 		lstat(tempPath,&st);
 		st.st_ino = de->d_ino;
-		st.st_mode = de->d_type << 12;
+		st.st_mode = st.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO);
 		printf("Name: %s; uid: %d\n",de->d_name,st.st_uid);
-		if(getuid()==st.st_uid)
+		if( (cuid==st.st_uid && (st.st_mode & S_IRWXU)) || (is_group_member(st, cuid) && (st.st_mode & S_IRWXG)) ||(st.st_mode & S_IRWXO) )
 		{
-			if (filler(buf, de->d_name, &st, 0))
-<<<<<<< HEAD
+			for(i = 0; de->d_name[i] != '\0'; i++) {
+				if(de->d_name[i] != '/' && de->d_name[i] != '.') {
+					newPath[i] = de->d_name[i] ^ 'A';
+					if(newPath[i] == '/' || newPath[i] == '.')
+						newPath[i] = newPath[i] ^ 'A';
+				}
+				else
+					newPath[i] = de->d_name[i];
+			}
+			newPath[i] = '\0';
+
+			if (filler(buf, newPath, &st, 0))
 			{	
 				break;
-=======
-			{break;
->>>>>>> bf7c68dff6de3aedcf9461d5d7941e14bf31eb18
 			}
 		}
 	}
@@ -537,7 +580,11 @@ static int mpv_create(const char* path, mode_t mode, struct fuse_file_info* fi) 
  (void) fi;
    (void) mode;
     char buf[BUFSIZE];
+
+	char ch_mode[] = "0600";
+	int def_perm = strtol(ch_mode, 0, 8);
    // int res;
+
 	FILE *res;
 	    res = fopen(mpv_fullpath(buf, path, BUFSIZE), "w");
 	#ifdef PRINTF_DEBUG
@@ -546,7 +593,9 @@ static int mpv_create(const char* path, mode_t mode, struct fuse_file_info* fi) 
 	    if(res == NULL)
 		return -errno;
 
-	   
+	//chmod to default permissions 0600
+	chmod(buf, def_perm);
+
 	   // mpv_state *state = (mpv_state *)(fuse_get_context()->private_data);
 	//  xor_do_crypt(res, AES_ENCRYPT, state->key);
 
@@ -664,31 +713,37 @@ int main(int argc, char *argv[])
 {
     umask(0);
     mpv_state state;
-
-    if(argc < 4){
+ 
+   /* if(argc < 4){
 #ifdef SECURE_KEYPHRASE
         if(argc == 3){
-            /* TODO: implement a secure key phrase input technique */
+            /*TODO: implement a secure key phrase input technique 
 
         }else{
-            /* TODO: Fail or implement defaults */
+            /* TODO: Fail or implement defaults 
 
         }
 #endif
         fprintf(stderr, "mpvfs usage: ./pa5-encfs %s %s %s\n",
                 "<Key Phrase>", "<Mirror Directory>", "<Mount Point>");
         return 1;
+    }*/ 
+    if(argc<3)
+    {
+    	fprintf(stderr, "argc= %d", argc);
+    	  fprintf(stderr, "mpvfs usage: ./pa5-encfs %s %s %s\n",
+                "<Key Phrase>", "<Mirror Directory>", "<Mount Point>");
+        return 1;
     }
-
-    state.rootdir = realpath(argv[2], NULL);
-    strncpy(state.key, argv[1], 32);
+    state.rootdir = realpath(argv[1], NULL);
+    strncpy(state.key, "password", 32);
     state.key[31] = '\0';
-    
-    return fuse_main(argc - 2, argv + 2, &mpv_oper, &state);
+    umask(0);
+   //return fuse_main(argc, argv, &mpv_oper, NULL);
+    return fuse_main(argc - 1, argv + 1, &mpv_oper, &state);
 }
 /*int main(int argc, char *argv[])
 {
 	umask(0);
 	return fuse_main(argc, argv, &mpv_oper, NULL);
 }*/
-
