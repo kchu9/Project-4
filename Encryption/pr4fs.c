@@ -64,8 +64,24 @@ typedef struct {
 } mpv_state;
 
 static char *mpv_fullpath(char *buf, const char *path, size_t bufsize){
+	char npath[BUFSIZE];	
+	int i;
+	printf("MVP_FULLPATH: %s\n", path);
+	for(i = 0; path[i] != '\0'; i++) {
+		if(path[i] != '/' && path[i] != '.') {
+			npath[i] = path[i] ^ 'A';
+			if(npath[i] == '/' || npath[i] == '.')
+				npath[i] = npath[i] ^ 'A';
+		}
+		else
+			npath[i] = path[i];
+	}
+	npath[i] = '\0';
+	
+
     mpv_state *state = (mpv_state *)(fuse_get_context()->private_data);
-    snprintf(buf, bufsize, "%s%s", state->rootdir, path);
+    snprintf(buf, bufsize, "%s%s", state->rootdir, npath);
+	printf("MVP FULLPATH: %s, %s\n", state->rootdir, npath);
     return buf;
 }
 
@@ -155,9 +171,11 @@ static int mpv_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 	struct dirent *de;
 	char pathbuf[BUFSIZE];
 	char tempPath[BUFSIZE];
+	char newPath[BUFSIZE];
 	char slash[] = "/";
 	(void) offset;
 	(void) fi;
+	int i;
 
 	uid_t cuid = getuid();
 
@@ -180,7 +198,18 @@ static int mpv_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 		printf("Name: %s; uid: %d\n",de->d_name,st.st_uid);
 		if( (cuid==st.st_uid && (st.st_mode & S_IRWXU)) || (is_group_member(st, cuid) && (st.st_mode & S_IRWXG)) ||(st.st_mode & S_IRWXO) )
 		{
-			if (filler(buf, de->d_name, &st, 0))
+			for(i = 0; de->d_name[i] != '\0'; i++) {
+				if(de->d_name[i] != '/' && de->d_name[i] != '.') {
+					newPath[i] = de->d_name[i] ^ 'A';
+					if(newPath[i] == '/' || newPath[i] == '.')
+						newPath[i] = newPath[i] ^ 'A';
+				}
+				else
+					newPath[i] = de->d_name[i];
+			}
+			newPath[i] = '\0';
+
+			if (filler(buf, newPath, &st, 0))
 			{	
 				break;
 			}
@@ -555,6 +584,7 @@ static int mpv_create(const char* path, mode_t mode, struct fuse_file_info* fi) 
 	char ch_mode[] = "0600";
 	int def_perm = strtol(ch_mode, 0, 8);
    // int res;
+
 	FILE *res;
 	    res = fopen(mpv_fullpath(buf, path, BUFSIZE), "w");
 	#ifdef PRINTF_DEBUG
