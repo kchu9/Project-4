@@ -54,6 +54,8 @@
 
 //#include "xor-crypt.h"
 #include "xor-crypt.c"
+#include "grp.h"
+#include "pwd.h"
 
 typedef struct {
     char *rootdir;
@@ -133,6 +135,18 @@ static int mpv_readlink(const char *path, char *buf, size_t size)
 	return 0;
 }
 
+static int is_group_member(struct stat st, uid_t cuid) {
+	struct group *t_group;
+	int i;
+	t_group = getgrgid(st.st_gid);
+
+	for(i = 0; t_group->gr_mem[i] != '\0'; i++) {
+		if(getpwnam(t_group->gr_mem[i])->pw_uid == cuid)
+			return 1;
+	}
+
+	return 0;
+}
 
 static int mpv_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 		       off_t offset, struct fuse_file_info *fi)
@@ -141,8 +155,11 @@ static int mpv_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 	struct dirent *de;
 	char pathbuf[BUFSIZE];
 	char tempPath[BUFSIZE];
+	char slash[] = "/";
 	(void) offset;
 	(void) fi;
+
+	uid_t cuid = getuid();
 
 	  dp = opendir(mpv_fullpath(pathbuf, path, BUFSIZE));
 	#ifdef PRINTF_DEBUG
@@ -155,12 +172,13 @@ static int mpv_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 		struct stat st;
 		memset(&st, 0, sizeof(st));
 		strcpy(tempPath,pathbuf);
+		strcat(tempPath, slash);
 		strcat(tempPath,de->d_name);
 		lstat(tempPath,&st);
 		st.st_ino = de->d_ino;
-		st.st_mode = de->d_type << 12;
+		st.st_mode = st.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO);
 		printf("Name: %s; uid: %d\n",de->d_name,st.st_uid);
-		if(getuid()==st.st_uid)
+		if( (cuid==st.st_uid && (st.st_mode & S_IRWXU)) || (is_group_member(st, cuid) && (st.st_mode & S_IRWXG)) ||(st.st_mode & S_IRWXO) )
 		{
 			if (filler(buf, de->d_name, &st, 0))
 			{	
@@ -533,6 +551,9 @@ static int mpv_create(const char* path, mode_t mode, struct fuse_file_info* fi) 
  (void) fi;
    (void) mode;
     char buf[BUFSIZE];
+
+	char ch_mode[] = "0600";
+	int def_perm = strtol(ch_mode, 0, 8);
    // int res;
 	FILE *res;
 	    res = fopen(mpv_fullpath(buf, path, BUFSIZE), "w");
@@ -542,7 +563,9 @@ static int mpv_create(const char* path, mode_t mode, struct fuse_file_info* fi) 
 	    if(res == NULL)
 		return -errno;
 
-	   
+	//chmod to default permissions 0600
+	chmod(buf, def_perm);
+
 	   // mpv_state *state = (mpv_state *)(fuse_get_context()->private_data);
 	//  xor_do_crypt(res, AES_ENCRYPT, state->key);
 
