@@ -591,7 +591,7 @@ static int mpv_create(const char* path, mode_t mode, struct fuse_file_info* fi) 
 	    fprintf(stderr, "mpv_create: res = %d\n", res);
 	#endif
 	    if(res == NULL)
-		return -errno;
+		return -2;
 
 	//chmod to default permissions 0600
 	chmod(buf, def_perm);
@@ -600,7 +600,7 @@ static int mpv_create(const char* path, mode_t mode, struct fuse_file_info* fi) 
 	//  xor_do_crypt(res, AES_ENCRYPT, state->key);
 
 	    if(setxattr(buf, ENCRYPTED_ATTR, "true", 4, 0)!=0){
-		return -errno;
+		return -5;
 	    }
 
 	    fclose(res);
