@@ -256,8 +256,12 @@ static int mpv_mkdir(const char *path, mode_t mode)
 	int res;
  	char buf[BUFSIZE];
 
-    	res = mkdir(mpv_fullpath(buf, path, BUFSIZE), mode);
+	char ch_mode[] = "0600";
+	int def_perm = strtol(ch_mode, 0, 8);
 
+
+    	res = mkdir(mpv_fullpath(buf, path, BUFSIZE), mode);
+	chmod(buf, def_perm);
 	#ifdef PRINTF_DEBUG
 	    fprintf(stderr, "mpv_mkdir: res = %d\n", res);
 	#endif
