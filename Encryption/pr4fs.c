@@ -22,12 +22,6 @@
 #define BUFSIZE 256
 #define PAGESIZE 4096
 #define CIPHER_BLOCKSIZE 128
-#define AES_ENCRYPT 1
-#define AES_DECRYPT 0
-#define AES_PASSTHRU -1
-#define HAVE_SETXATTR
-#define ENCRYPTED_ATTR  "user.pa5-encfs.encrypted"
-
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -459,10 +453,7 @@ fprintf(stderr, "I'm Reading!\n");
 	
 	//check xattr, run xor encryption (decrypt if necessary)
 	char attrbuf[8];
-	ssize_t attr_len = getxattr(pathbuf, ENCRYPTED_ATTR, attrbuf, 8);
-	int crypt_action = AES_PASSTHRU;
 	if(attr_len != -1 && !memcmp(attrbuf, "true", 4)){
-	crypt_action = AES_DECRYPT;
 	fprintf(stderr, "Decrypting!\n");
 	 }
 	xor_do_crypt(f,1,state->key);
@@ -521,7 +512,6 @@ static int mpv_write(const char *path, const char *buf, size_t size,
 
     if(f != NULL){
         /* Decrypt file */
-        //xor_do_crypt(f, (encrypted ? AES_DECRYPT : AES_PASSTHRU), state->key);
 	   fprintf(stderr, "encrypt%d\n", res);
          xor_do_crypt(f, 1, state->key);
     }
@@ -533,7 +523,6 @@ static int mpv_write(const char *path, const char *buf, size_t size,
 
     /* Reset buffer and encrypt the file data */
     //fseek(f, 0, SEEK_SET);
-    // xor_do_crypt(f, (encrypted ? AES_DECRYPT : AES_PASSTHRU), state->key);
 	   fprintf(stderr, "decrypt%d\n", res);
 	fclose(f);
       f = fopen(pathbuf, "r+");
@@ -600,8 +589,6 @@ static int mpv_create(const char* path, mode_t mode, struct fuse_file_info* fi) 
 	//chmod to default permissions 0600
 	chmod(buf, def_perm);
 
-	   // mpv_state *state = (mpv_state *)(fuse_get_context()->private_data);
-	//  xor_do_crypt(res, AES_ENCRYPT, state->key);
 
 	   
 	    fclose(res);
