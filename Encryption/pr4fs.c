@@ -18,13 +18,6 @@
 
 */
 
-#define FUSE_USE_VERSION 28
-#define BUFSIZE 256
-#define PAGESIZE 4096
-#define CIPHER_BLOCKSIZE 128
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
 
 #ifdef linux
 /* For pread()/pwrite() */
@@ -702,20 +695,7 @@ int main(int argc, char *argv[])
     umask(0);
     mpv_state state;
  
-   /* if(argc < 4){
-#ifdef SECURE_KEYPHRASE
-        if(argc == 3){
-            /*TODO: implement a secure key phrase input technique 
 
-        }else{
-            /* TODO: Fail or implement defaults 
-
-        }
-#endif
-        fprintf(stderr, "mpvfs usage: ./pa5-encfs %s %s %s\n",
-                "<Key Phrase>", "<Mirror Directory>", "<Mount Point>");
-        return 1;
-    }*/ 
     if(argc<3)
     {
     	fprintf(stderr, "argc= %d", argc);
